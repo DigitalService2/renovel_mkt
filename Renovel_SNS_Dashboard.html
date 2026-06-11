@@ -178,6 +178,10 @@
     .platform-info { flex: 1; }
     .platform-name  { font-size: 11px; color: var(--gray-3); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
     .platform-handle { font-size: 13px; font-weight: 700; color: var(--text); }
+    a.platform-handle { text-decoration: none; }
+    a.platform-handle:hover { text-decoration: underline; }
+    .channel-handle-link { font-size: 18px; font-weight: 800; color: var(--text); text-decoration: none; }
+    .channel-handle-link:hover { text-decoration: underline; }
     .platform-stats { display: flex; gap: 20px; margin-top: 10px; }
     .pstat-val { font-size: 20px; font-weight: 800; line-height: 1; }
     .pstat-lbl { font-size: 11px; color: var(--gray-3); margin-top: 2px; }
@@ -434,7 +438,7 @@
         </div>
         <div class="platform-info">
           <div class="platform-name">YouTube <span id="yt-live-badge" style="display:none;font-size:9px;background:var(--green-bg);color:var(--green-d);border-radius:4px;padding:1px 5px;font-weight:700;vertical-align:middle;margin-left:4px">LIVE</span></div>
-          <div class="platform-handle">@renovel.official</div>
+          <a href="https://www.youtube.com/@renovel.official" target="_blank" rel="noopener noreferrer" class="platform-handle">@renovel.official</a>
           <div class="platform-stats">
             <div class="pstat">
               <div class="pstat-val" style="color:var(--yt)" id="yt-subscribers">7</div>
@@ -461,7 +465,7 @@
         </div>
         <div class="platform-info">
           <div class="platform-name">TikTok</div>
-          <div class="platform-handle">@renovel.official</div>
+          <a href="https://www.tiktok.com/@renovel.official" target="_blank" rel="noopener noreferrer" class="platform-handle">@renovel.official</a>
           <div class="platform-stats">
             <div class="pstat">
               <div class="pstat-val" style="color:var(--tt)" id="tt-followers">—</div>
@@ -488,7 +492,7 @@
         </div>
         <div class="platform-info">
           <div class="platform-name">Instagram</div>
-          <div class="platform-handle">@renovel.official</div>
+          <a href="https://www.instagram.com/renovel.official" target="_blank" rel="noopener noreferrer" class="platform-handle">@renovel.official</a>
           <div class="platform-stats">
             <div class="pstat">
               <div class="pstat-val" style="color:var(--ig)" id="ig-followers">—</div>
@@ -1115,7 +1119,7 @@
     </div>
     <div style="flex:1">
       <div style="display:flex;align-items:center;gap:8px">
-        <div style="font-size:18px;font-weight:800;color:var(--text)">@renovel.official</div>
+        <a href="https://www.youtube.com/@renovel.official" target="_blank" rel="noopener noreferrer" class="channel-handle-link">@renovel.official</a>
         <span style="background:var(--yt-bg);color:#FF0000;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">YouTube</span>
         <span id="yt-page-live" style="display:none;background:var(--green-bg);color:var(--green-d);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">● LIVE</span>
       </div>
@@ -1163,7 +1167,7 @@
       </div>
       <div style="flex:1">
         <div style="display:flex;align-items:center;gap:8px">
-          <div style="font-size:18px;font-weight:800;color:var(--text)">@renovel.official</div>
+          <a href="https://www.tiktok.com/@renovel.official" target="_blank" rel="noopener noreferrer" class="channel-handle-link">@renovel.official</a>
           <span style="background:var(--tt-bg);color:var(--tt);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">TikTok</span>
         </div>
         <div style="font-size:13px;color:var(--gray-3);margin-top:3px">콘텐츠 링크를 직접 추가해 관리하세요</div>
@@ -1209,7 +1213,7 @@
       </div>
       <div style="flex:1">
         <div style="display:flex;align-items:center;gap:8px">
-          <div style="font-size:18px;font-weight:800;color:var(--text)">@renovel.official</div>
+          <a href="https://www.instagram.com/renovel.official" target="_blank" rel="noopener noreferrer" class="channel-handle-link">@renovel.official</a>
           <span style="background:var(--ig-bg);color:var(--ig);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">Instagram</span>
         </div>
         <div style="font-size:13px;color:var(--gray-3);margin-top:3px">콘텐츠 링크를 직접 추가해 관리하세요</div>
