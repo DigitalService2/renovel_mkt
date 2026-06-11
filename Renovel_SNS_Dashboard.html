@@ -1714,6 +1714,7 @@
 
   function getContentList(platform) {
     if (_jbCache) return _jbCache[platform + '_content'] || [];
+    // jbCache 없으면 localStorage 폴백
     return JSON.parse(localStorage.getItem('renovel_content_' + platform) || '[]');
   }
   async function saveContentList(platform, list) {
@@ -1759,7 +1760,18 @@
     renderContentGrid(platform);
   }
 
-  function renderContentGrid(platform) {
+  async function renderContentGrid(platform) {
+    // jbCache 없으면 먼저 JSONBin에서 데이터 로드
+    if (!_jbCache) {
+      const record = await jbRead();
+      ['tt','ig'].forEach(p => {
+        if (record[p + '_content']?.length)
+          localStorage.setItem('renovel_content_' + p, JSON.stringify(record[p + '_content']));
+        if (record[p] && Object.keys(record[p]).length)
+          localStorage.setItem('renovel_' + p, JSON.stringify(record[p]));
+      });
+      loadManualData();
+    }
     const list    = getContentList(platform);
     const gridId  = platform + '-video-grid';
     const grid    = document.getElementById(gridId);
