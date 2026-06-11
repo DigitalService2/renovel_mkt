@@ -1351,6 +1351,32 @@
   const YT_API_KEY    = 'AIzaSyAN5TwTebmQ6dvTHr_cCM0GxJgpl7isfik';
   const YT_CHANNEL_ID = 'UCnmWTeZpyuLkZP9ccc8_xfA';
 
+  // ── JSONBin 설정 ──
+  const JB_KEY = '$2a$10$xEGyd7Oc2Ea.lD3V904Cq.6opwij9aji3vXdtYEVW0B1JmN3r1pfC';
+  const JB_BIN = '6a2a9031f5f4af5e29de2762';
+  const JB_URL = `https://api.jsonbin.io/v3/b/${JB_BIN}`;
+  let   _jbCache = null; // 로컬 캐시
+
+  async function jbRead() {
+    try {
+      const res  = await fetch(`${JB_URL}/latest`, { headers: { 'X-Master-Key': JB_KEY } });
+      const data = await res.json();
+      _jbCache = data.record;
+      return _jbCache;
+    } catch(e) { return _jbCache || { tt:{}, ig:{}, tt_content:[], ig_content:[] }; }
+  }
+
+  async function jbWrite(record) {
+    _jbCache = record;
+    try {
+      await fetch(JB_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type':'application/json', 'X-Master-Key': JB_KEY },
+        body: JSON.stringify(record)
+      });
+    } catch(e) { console.warn('JSONBin 저장 실패:', e); }
+  }
+
   // ── 페이지 전환 ──
   const PAGES = ['page-dashboard','page-youtube','page-tiktok','page-instagram'];
 
@@ -1528,13 +1554,17 @@
     _currentPlatform = null;
   }
 
-  function saveModal() {
+  async function saveModal() {
     const cfg = MODAL_CFG[_currentPlatform];
     const inputs = document.querySelectorAll('#modal-fields input');
     const data = {};
     inputs.forEach(inp => { data[inp.dataset.id] = inp.value.trim(); });
     localStorage.setItem('renovel_' + _currentPlatform, JSON.stringify(data));
     applyManualData(_currentPlatform, data);
+    // JSONBin에도 저장
+    const record = _jbCache || await jbRead();
+    record[_currentPlatform] = data;
+    await jbWrite(record);
     closeModal();
   }
 
@@ -1683,13 +1713,17 @@
   }
 
   function getContentList(platform) {
+    if (_jbCache) return _jbCache[platform + '_content'] || [];
     return JSON.parse(localStorage.getItem('renovel_content_' + platform) || '[]');
   }
-  function saveContentList(platform, list) {
+  async function saveContentList(platform, list) {
+    const record = _jbCache || await jbRead();
+    record[platform + '_content'] = list;
     localStorage.setItem('renovel_content_' + platform, JSON.stringify(list));
+    await jbWrite(record);
   }
 
-  function saveContent() {
+  async function saveContent() {
     const url      = document.getElementById('cm-url').value.trim();
     const title    = document.getElementById('cm-title-input').value.trim();
     const date     = document.getElementById('cm-date').value;
@@ -1703,6 +1737,9 @@
 
     if (!url && !title) { alert('URL 또는 제목을 입력해주세요'); return; }
 
+    const saveBtn = document.querySelector('#content-modal button[onclick="saveContent()"]');
+    if (saveBtn) { saveBtn.textContent = '저장 중...'; saveBtn.disabled = true; }
+
     const list = getContentList(_cmPlatform);
     if (_cmEditId) {
       const idx = list.findIndex(i => i.id === _cmEditId);
@@ -1710,15 +1747,15 @@
     } else {
       list.unshift({ id: Date.now().toString(), url, title, date, thumb, views, likes, comments, shares });
     }
-    saveContentList(_cmPlatform, list);
+    await saveContentList(_cmPlatform, list);
     renderContentGrid(_cmPlatform);
     closeContentModal();
   }
 
-  function deleteContent(platform, id) {
+  async function deleteContent(platform, id) {
     if (!confirm('이 콘텐츠를 삭제할까요?')) return;
     const list = getContentList(platform).filter(i => i.id !== id);
-    saveContentList(platform, list);
+    await saveContentList(platform, list);
     renderContentGrid(platform);
   }
 
@@ -1819,7 +1856,18 @@
     if (e.target === this) closeContentModal();
   });
 
-  loadManualData();
+  // JSONBin에서 데이터 로드 후 화면 반영
+  jbRead().then(record => {
+    ['tt','ig'].forEach(p => {
+      if (record[p] && Object.keys(record[p]).length) {
+        localStorage.setItem('renovel_' + p, JSON.stringify(record[p]));
+      }
+      if (record[p + '_content']?.length) {
+        localStorage.setItem('renovel_content_' + p, JSON.stringify(record[p + '_content']));
+      }
+    });
+    loadManualData();
+  });
   loadYouTube();
   // 30분마다 자동 갱신
   setInterval(loadYouTube, 30 * 60 * 1000);
