@@ -1989,7 +1989,8 @@
   }
 
   function titleKey(title) {
-    return (title || '').replace(/\s/g, '').slice(0, 4).toLowerCase();
+    const words = (title || '').trim().split(/\s+/);
+    return words.slice(0, 2).join('').toLowerCase();
   }
 
   async function renderReport() {
