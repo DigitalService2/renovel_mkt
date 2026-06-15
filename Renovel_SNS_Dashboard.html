@@ -182,7 +182,10 @@
     .platform-icon.tt { background: var(--tt-bg); }
     .platform-icon.ig { background: var(--ig-grad); }
     .platform-info { flex: 1; }
-    .platform-name  { font-size: 11px; color: var(--gray-3); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+    .platform-name  { font-size: 11px; color: var(--gray-3); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+    .platform-name.yt { color: var(--yt); }
+    .platform-name.tt { color: var(--tt); }
+    .platform-name.ig { color: var(--ig); }
     .platform-handle { font-size: 13px; font-weight: 700; color: var(--text); }
     a.platform-handle { text-decoration: none; }
     a.platform-handle:hover { text-decoration: underline; }
@@ -212,6 +215,8 @@
     .kpi-label .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .kpi-value { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 6px; }
     .kpi-delta { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .kpi-delta.up { color: var(--green); }
+    .kpi-delta.down { color: var(--blue); }
 
     /* ─── CARD ─── */
     .card { background: var(--white); border-radius: 12px; border: 1px solid var(--gray-1); overflow: hidden; }
@@ -259,6 +264,58 @@
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--gray-0); }
     tbody td { padding: 12px; font-size: 13px; vertical-align: middle; }
+
+    .th-label-tip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      justify-content: flex-end;
+    }
+    .th-tooltip-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--gray-1);
+      color: var(--gray-3);
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: help;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .th-tooltip-icon::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      right: 0;
+      width: max-content;
+      max-width: 280px;
+      padding: 8px 10px;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 400;
+      line-height: 1.45;
+      letter-spacing: 0;
+      text-transform: none;
+      border-radius: 6px;
+      white-space: normal;
+      text-align: left;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .15s, visibility .15s;
+      z-index: 200;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    }
+    .th-tooltip-icon:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
 
     /* ─── BADGES ─── */
     .badge {
@@ -446,7 +503,7 @@
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
         내보내기
       </button>
-      <button class="btn btn-primary">
+      <button class="btn btn-primary" onclick="location.reload()">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
         새로고침
       </button>
@@ -464,7 +521,7 @@
           <svg viewBox="0 0 24 24" fill="var(--yt)"><path d="M21.6 7.2s-.2-1.4-.8-2a2.9 2.9 0 0 0-2-1C17 4 12 4 12 4s-5 0-6.8.2a2.9 2.9 0 0 0-2 1c-.6.6-.8 2-.8 2S2 8.8 2 10.4v1.4c0 1.6.2 3.2.2 3.2s.2 1.4.8 2a3 3 0 0 0 2.1 1C6.3 18.2 12 18.2 12 18.2s5 0 6.8-.2a3 3 0 0 0 2-1c.7-.6.9-2 .9-2s.2-1.6.2-3.2v-1.4C22 8.8 21.6 7.2 21.6 7.2zM10 14.6V9.4l5.5 2.6-5.5 2.6z"/></svg>
         </div>
         <div class="platform-info">
-          <div class="platform-name">YouTube <span id="yt-live-badge" style="display:none;font-size:9px;background:var(--green-bg);color:var(--green-d);border-radius:4px;padding:1px 5px;font-weight:700;vertical-align:middle;margin-left:4px">LIVE</span></div>
+          <div class="platform-name yt">YouTube <span id="yt-live-badge" style="display:none;font-size:9px;background:var(--green-bg);color:var(--green-d);border-radius:4px;padding:1px 5px;font-weight:700;vertical-align:middle;margin-left:4px">LIVE</span></div>
           <a href="https://www.youtube.com/@renovel.official" target="_blank" rel="noopener noreferrer" class="platform-handle">@renovel.official</a>
           <div class="platform-stats">
             <div class="pstat">
@@ -491,7 +548,7 @@
           <svg viewBox="0 0 24 24" fill="var(--tt)"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.79 1.54V6.79a4.86 4.86 0 0 1-1.02-.1z"/></svg>
         </div>
         <div class="platform-info">
-          <div class="platform-name">TikTok</div>
+          <div class="platform-name tt">TikTok</div>
           <a href="https://www.tiktok.com/@renovel.official" target="_blank" rel="noopener noreferrer" class="platform-handle">@renovel.official</a>
           <div class="platform-stats">
             <div class="pstat">
@@ -518,7 +575,7 @@
           <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
         </div>
         <div class="platform-info">
-          <div class="platform-name">Instagram</div>
+          <div class="platform-name ig">Instagram</div>
           <a href="https://www.instagram.com/renovel.official" target="_blank" rel="noopener noreferrer" class="platform-handle">@renovel.official</a>
           <div class="platform-stats">
             <div class="pstat">
@@ -584,9 +641,9 @@
             <div class="card-subtitle">최근 8주 · 주간 합산</div>
           </div>
           <div style="display:flex;gap:12px;align-items:center">
-            <span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--yt)"><span style="width:10px;height:3px;background:var(--yt);border-radius:2px;display:inline-block"></span>YT</span>
-            <span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--tt)"><span style="width:10px;height:3px;background:var(--tt);border-radius:2px;display:inline-block"></span>TT</span>
-            <span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--ig)"><span style="width:10px;height:3px;background:var(--ig);border-radius:2px;display:inline-block"></span>IG</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--yt)"><span style="width:10px;height:3px;background:var(--yt);border-radius:2px;display:inline-block"></span>YouTube</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--tt)"><span style="width:10px;height:3px;background:var(--tt);border-radius:2px;display:inline-block"></span>TikTok</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--ig)"><span style="width:10px;height:3px;background:var(--ig);border-radius:2px;display:inline-block"></span>Instagram</span>
           </div>
         </div>
         <div class="card-body">
@@ -730,7 +787,7 @@
             <th style="width:32px">#</th>
             <th>콘텐츠</th>
             <th>채널</th>
-            <th>업로드일</th>
+            <th>업로드 날짜</th>
             <th>조회수</th>
             <th>좋아요</th>
             <th>댓글</th>
@@ -1046,9 +1103,9 @@
               <div style="width:19.1%;background:var(--ig);border-radius:0 99px 99px 0"></div>
             </div>
             <div style="display:flex;gap:16px;margin-top:8px">
-              <span style="font-size:11px;font-weight:600;color:var(--tt)">TT 45.2%</span>
-              <span style="font-size:11px;font-weight:600;color:var(--yt)">YT 35.7%</span>
-              <span style="font-size:11px;font-weight:600;color:var(--ig)">IG 19.1%</span>
+              <span style="font-size:11px;font-weight:600;color:var(--tt)">TikTok 45.2%</span>
+              <span style="font-size:11px;font-weight:600;color:var(--yt)">YouTube 35.7%</span>
+              <span style="font-size:11px;font-weight:600;color:var(--ig)">Instagram 19.1%</span>
             </div>
           </div>
         </div>
@@ -1316,7 +1373,7 @@
     <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:24px 28px">
       <div style="margin-bottom:16px">
         <div style="font-size:15px;font-weight:700">크로스플랫폼 콘텐츠 성과</div>
-        <div style="font-size:12px;color:var(--gray-3);margin-top:2px">업로드 2주 이내 · 제목 첫 글자 기준으로 동일 콘텐츠 자동 매칭</div>
+        <div style="font-size:12px;color:var(--gray-3);margin-top:2px">업로드 2주 이내 · 제목 첫 두 단어 기준으로 동일 콘텐츠 자동 매칭</div>
       </div>
       <div id="report-cross"></div>
     </div>
@@ -1889,23 +1946,23 @@
           <div style="font-size:13px;font-weight:700;line-height:1.45;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
             ${item.url ? `<a href="${item.url}" target="_blank" style="color:var(--text);text-decoration:none">${item.title || item.url}</a>` : (item.title || '—')}
           </div>
-          <div style="font-size:11px;color:var(--gray-3);margin-bottom:10px">${dateStr}</div>
+          <div style="font-size:11px;color:var(--gray-3);margin-bottom:10px">${dateStr ? '업로드 날짜 ' + dateStr : ''}</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;text-align:center;margin-bottom:10px">
             <div style="background:#fff;border-radius:6px;padding:6px 2px">
               <div style="font-size:12px;font-weight:800;color:${color}">${fmt(views)}</div>
-              <div style="font-size:9px;color:var(--gray-3)">조회</div>
+              <div style="font-size:10px;color:var(--gray-3)">조회</div>
             </div>
             <div style="background:#fff;border-radius:6px;padding:6px 2px">
               <div style="font-size:12px;font-weight:700">${fmt(likes)}</div>
-              <div style="font-size:9px;color:var(--gray-3)">좋아요</div>
+              <div style="font-size:10px;color:var(--gray-3)">좋아요</div>
             </div>
             <div style="background:#fff;border-radius:6px;padding:6px 2px">
               <div style="font-size:12px;font-weight:700">${fmt(comments)}</div>
-              <div style="font-size:9px;color:var(--gray-3)">댓글</div>
+              <div style="font-size:10px;color:var(--gray-3)">댓글</div>
             </div>
             <div style="background:#fff;border-radius:6px;padding:6px 2px">
               <div style="font-size:12px;font-weight:700;color:${erColor}">${er !== '—' ? er+'%' : '—'}</div>
-              <div style="font-size:9px;color:var(--gray-3)">ER</div>
+              <div style="font-size:10px;color:var(--gray-3)">ER</div>
             </div>
           </div>
           <div style="display:flex;gap:6px">
@@ -2085,11 +2142,11 @@
         const erC    = parseFloat(er) >= 5 ? 'var(--green)' : 'var(--gray-3)';
         return `<div style="flex:1;padding:12px;background:var(--gray-0);border-radius:8px">
           <div style="font-size:10px;font-weight:700;color:${color};margin-bottom:10px">${pLabel}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
-            <div><div style="font-size:16px;font-weight:800">${fmt(item.views || 0)}</div><div style="font-size:9px;color:var(--gray-3);margin-top:2px">조회수</div></div>
-            <div><div style="font-size:16px;font-weight:800">${fmt(item.likes || 0)}</div><div style="font-size:9px;color:var(--gray-3);margin-top:2px">좋아요</div></div>
-            <div><div style="font-size:16px;font-weight:800">${fmt(item.comments || 0)}</div><div style="font-size:9px;color:var(--gray-3);margin-top:2px">댓글</div></div>
-            <div><div style="font-size:16px;font-weight:800;color:${erC}">${er}</div><div style="font-size:9px;color:var(--gray-3);margin-top:2px">ER</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;text-align:center">
+            <div><div style="font-size:16px;font-weight:800">${fmt(item.views || 0)}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">조회수</div></div>
+            <div><div style="font-size:16px;font-weight:800">${fmt(item.likes || 0)}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">좋아요</div></div>
+            <div><div style="font-size:16px;font-weight:800">${fmt(item.comments || 0)}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">댓글</div></div>
+            <div><div style="font-size:16px;font-weight:800;color:${erC}">${er}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">ER</div></div>
           </div>
         </div>`;
       };
@@ -2123,11 +2180,11 @@
       <thead><tr style="border-bottom:2px solid var(--gray-1)">
         <th style="text-align:left;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">플랫폼</th>
         <th style="text-align:left;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">콘텐츠</th>
-        <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">날짜</th>
+        <th style="text-align:center;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">업로드 날짜</th>
         <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">조회수</th>
         <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">좋아요</th>
         <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">댓글</th>
-        <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">ER</th>
+        <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600"><span class="th-label-tip">ER<span class="th-tooltip-icon" data-tooltip="콘텐츠 단위 반응률 측정에 적합한 조회수 기반의 ER = (좋아요 + 댓글) / 조회수 × 100" aria-label="ER 안내">?</span></span></th>
       </tr></thead>
       <tbody>${sorted.map(v => {
         const pName  = { yt: 'YouTube', tt: 'TikTok', ig: 'Instagram' }[v.platform];
@@ -2143,7 +2200,7 @@
               <a href="${v.url || '#'}" target="_blank" style="color:var(--text);text-decoration:none;font-weight:600;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden">${v.title || '—'}</a>
             </div>
           </td>
-          <td style="padding:10px 12px;text-align:right;color:var(--gray-3)">${v.date?.slice(2).replace(/-/g, '.') || '—'}</td>
+          <td style="padding:10px 12px;text-align:center;color:var(--gray-3)">${v.date?.slice(2).replace(/-/g, '.') || '—'}</td>
           <td style="padding:10px 12px;text-align:right;font-weight:700">${fmt(v.views || 0)}</td>
           <td style="padding:10px 12px;text-align:right">${fmt(v.likes || 0)}</td>
           <td style="padding:10px 12px;text-align:right">${fmt(v.comments || 0)}</td>
