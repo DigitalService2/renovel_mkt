@@ -1782,10 +1782,14 @@
     closeModal();
   }
 
+  // 콘텐츠 리스트로 자동 계산되는 항목 — applyManualData에서 덮어쓰지 않음
+  const CONTENT_DRIVEN_IDS = new Set(['tt-video-count','tt-view-count','ig-post-count','ig-reach']);
+
   function applyManualData(platform, data) {
     const cfg = MODAL_CFG[platform];
     cfg.fields.forEach(f => {
       if (f.id.endsWith('-text')) return; // delta는 별도 처리
+      if (CONTENT_DRIVEN_IDS.has(f.id)) return; // 콘텐츠 리스트가 소스
       const el = document.getElementById(f.id);
       if (el && data[f.id]) el.textContent = Number(data[f.id]).toLocaleString();
     });
