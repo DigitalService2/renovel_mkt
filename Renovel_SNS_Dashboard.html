@@ -1567,12 +1567,18 @@
     if (!activeId) return;
 
     const target = document.getElementById(activeId);
-    const scrollY = window.scrollY;
-    window.scrollTo(0, 0);
-
     const origHtml = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<span style="font-size:13px">저장 중...</span>';
+
+    // 전체 콘텐츠 캡처: target을 절대 위치 임시 확장 후 캡처
+    const prevStyle = target.getAttribute('style') || '';
+    const fullH = target.scrollHeight;
+    const fullW = target.scrollWidth;
+
+    // 스크롤 위치 초기화 (body)
+    const savedScrollY = window.scrollY;
+    window.scrollTo(0, 0);
 
     try {
       await new Promise(r => setTimeout(r, 150));
@@ -1583,12 +1589,13 @@
         allowTaint: true,
         backgroundColor: '#F4F6FA',
         logging: false,
-        width: target.scrollWidth,
-        height: target.scrollHeight,
-        windowWidth: target.scrollWidth,
-        windowHeight: target.scrollHeight,
+        width: fullW,
+        height: fullH,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: fullH,
         scrollX: 0,
-        scrollY: 0,
+        scrollY: -target.getBoundingClientRect().top + window.scrollY,
+        y: target.getBoundingClientRect().top + window.scrollY,
       });
 
       const d = new Date();
@@ -1608,7 +1615,7 @@
       console.error('Export failed:', e);
       alert('스크린샷 저장에 실패했습니다. 다시 시도해주세요.');
     } finally {
-      window.scrollTo(0, scrollY);
+      window.scrollTo(0, savedScrollY);
       btn.disabled = false;
       btn.innerHTML = origHtml;
     }
