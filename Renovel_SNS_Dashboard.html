@@ -2077,14 +2077,13 @@
         const er     = item.views > 0 ? ((item.likes + item.comments) / item.views * 100).toFixed(1) + '%' : '—';
         const erC    = parseFloat(er) >= 5 ? 'var(--green)' : 'var(--gray-3)';
         return `<div style="flex:1;padding:12px;background:var(--gray-0);border-radius:8px">
-          <div style="font-size:10px;font-weight:700;color:${color};margin-bottom:8px">${pLabel}</div>
-          <div style="font-size:16px;font-weight:800">${fmt(item.views || 0)}</div>
-          <div style="font-size:10px;color:var(--gray-3)">조회수</div>
-          <div style="display:flex;gap:8px;margin-top:6px">
-            <span style="font-size:11px">👍 ${fmt(item.likes || 0)}</span>
-            <span style="font-size:11px">💬 ${fmt(item.comments || 0)}</span>
+          <div style="font-size:10px;font-weight:700;color:${color};margin-bottom:10px">${pLabel}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div><div style="font-size:16px;font-weight:800">${fmt(item.views || 0)}</div><div style="font-size:9px;color:var(--gray-3);margin-top:2px">조회수</div></div>
+            <div><div style="font-size:16px;font-weight:800">${fmt(item.likes || 0)}</div><div style="font-size:9px;color:var(--gray-3);margin-top:2px">좋아요</div></div>
+            <div><div style="font-size:16px;font-weight:800">${fmt(item.comments || 0)}</div><div style="font-size:9px;color:var(--gray-3);margin-top:2px">댓글</div></div>
+            <div><div style="font-size:16px;font-weight:800;color:${erC}">${er}</div><div style="font-size:9px;color:var(--gray-3);margin-top:2px">ER</div></div>
           </div>
-          <div style="font-size:11px;color:${erC};margin-top:4px;font-weight:600">ER ${er}</div>
         </div>`;
       };
       crossEl.innerHTML = crossItems.map(g => {
