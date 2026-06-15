@@ -2203,17 +2203,20 @@
       </div>`;
     }).join('');
 
-    // 크로스플랫폼 매칭 (2주 이내)
+    // 크로스플랫폼 매칭: 전체 항목을 제목 기준으로 그룹화, 그룹 내 1개 이상이 2주 이내이면 표시
     const twoWeeksAgo = new Date(); twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-    const recent = allItems.filter(v => v.date && new Date(v.date) >= twoWeeksAgo);
     const groups = {};
-    recent.forEach(v => {
+    allItems.forEach(v => {
       const key = titleKey(v.title);
       if (!key) return;
       if (!groups[key]) groups[key] = { items: [] };
       groups[key].items.push(v);
     });
-    const crossItems = Object.values(groups).filter(g => new Set(g.items.map(i => i.platform)).size >= 2);
+    const crossItems = Object.values(groups).filter(g => {
+      const platforms = new Set(g.items.map(i => i.platform));
+      const hasRecent = g.items.some(i => i.date && new Date(i.date) >= twoWeeksAgo);
+      return platforms.size >= 2 && hasRecent;
+    });
 
     const crossEl = document.getElementById('report-cross');
     if (!crossItems.length) {
