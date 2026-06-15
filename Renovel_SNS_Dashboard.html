@@ -2057,14 +2057,28 @@
 
   function updateChannelPageStats(platform, list) {
     const isTT = platform === 'tt';
+    const total = list.reduce((s, i) => s + (i.views || 0), 0);
+
+    // 채널별 페이지 stats
     const countEl = document.getElementById(platform + '-page-count');
     if (countEl) countEl.textContent = list.length;
     const totalEl = document.getElementById(isTT ? 'tt-page-total-views' : 'ig-page-total-likes');
-    if (totalEl) {
-      const total = list.reduce((s, i) => s + (i.views||0), 0);
-      totalEl.textContent = fmt(total);
+    if (totalEl) totalEl.textContent = fmt(total);
+
+    // 대시보드 동기화
+    if (isTT) {
+      const dbCount = document.getElementById('tt-video-count');
+      const dbViews = document.getElementById('tt-view-count');
+      if (dbCount) dbCount.textContent = list.length;
+      if (dbViews) dbViews.textContent = fmt(total);
+    } else {
+      const dbCount = document.getElementById('ig-post-count');
+      const dbViews = document.getElementById('ig-reach');
+      if (dbCount) dbCount.textContent = list.length;
+      if (dbViews) dbViews.textContent = fmt(total);
     }
-    // 채널 카드 팔로워 연동
+
+    // 채널 페이지 팔로워 연동
     const savedTT = JSON.parse(localStorage.getItem('renovel_tt') || '{}');
     const savedIG = JSON.parse(localStorage.getItem('renovel_ig') || '{}');
     const ttF = document.getElementById('tt-page-followers');
