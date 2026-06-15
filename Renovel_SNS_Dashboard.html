@@ -499,7 +499,7 @@
         <option>최근 90일</option>
         <option>전체 기간</option>
       </select>
-      <button class="btn btn-ghost">
+      <button class="btn btn-ghost" id="btn-export" onclick="exportPageScreenshot()">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
         내보내기
       </button>
@@ -1480,6 +1480,7 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
   const YT_API_KEY    = 'AIzaSyAN5TwTebmQ6dvTHr_cCM0GxJgpl7isfik';
   const YT_CHANNEL_ID = 'UCnmWTeZpyuLkZP9ccc8_xfA';
@@ -1539,6 +1540,80 @@
     if (id === 'page-report')    renderReport();
   }
 
+  const EXPORT_NAMES = {
+    'page-dashboard': 'renovel-dashboard',
+    'page-youtube':   'renovel-youtube',
+    'page-tiktok':    'renovel-tiktok',
+    'page-instagram': 'renovel-instagram',
+    'page-report':    'renovel-report',
+  };
+
+  function getActivePageId() {
+    return PAGES.find(id => {
+      const el = document.getElementById(id);
+      return el && el.style.display !== 'none';
+    });
+  }
+
+  async function exportPageScreenshot() {
+    const btn = document.getElementById('btn-export');
+    if (!btn || btn.disabled) return;
+    if (typeof html2canvas === 'undefined') {
+      alert('스크린샷 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    const activeId = getActivePageId();
+    if (!activeId) return;
+
+    const target = document.getElementById(activeId);
+    const scrollY = window.scrollY;
+    window.scrollTo(0, 0);
+
+    const origHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span style="font-size:13px">저장 중...</span>';
+
+    try {
+      await new Promise(r => setTimeout(r, 150));
+
+      const canvas = await html2canvas(target, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#F4F6FA',
+        logging: false,
+        width: target.scrollWidth,
+        height: target.scrollHeight,
+        windowWidth: target.scrollWidth,
+        windowHeight: target.scrollHeight,
+        scrollX: 0,
+        scrollY: 0,
+      });
+
+      const d = new Date();
+      const ts = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+      const filename = `${EXPORT_NAMES[activeId] || 'renovel-export'}_${ts}.jpg`;
+
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+      if (!blob) throw new Error('이미지 생성 실패');
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Export failed:', e);
+      alert('스크린샷 저장에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      window.scrollTo(0, scrollY);
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
+  }
+
   // ── YouTube 채널 페이지 데이터 ──
   async function loadYouTubePage() {
     // ① 채널 통계
@@ -1582,7 +1657,7 @@
         const views   = parseInt(s.viewCount   || 0);
         const likes   = parseInt(s.likeCount   || 0);
         const comments= parseInt(s.commentCount|| 0);
-        const er      = views > 0 ? ((likes + comments) / views * 100).toFixed(1) : '0.0';
+        const er      = views > 0 ? calcER(views, likes, comments) : '0%';
         const erColor = parseFloat(er) >= 5 ? 'var(--green)' : parseFloat(er) >= 2 ? 'var(--amber)' : 'var(--gray-3)';
         const thumb   = sn.thumbnails?.medium?.url || sn.thumbnails?.default?.url || '';
         const date    = new Date(sn.publishedAt);
@@ -1626,7 +1701,7 @@
                 <div style="font-size:10px;color:var(--gray-3)">댓글</div>
               </div>
               <div style="background:#fff;border-radius:6px;padding:6px 2px">
-                <div style="font-size:13px;font-weight:700;color:${erColor}">${er}%</div>
+                <div style="font-size:13px;font-weight:700;color:${erColor}">${er}</div>
                 <div style="font-size:10px;color:var(--gray-3)">ER</div>
               </div>
             </div>
@@ -1932,7 +2007,7 @@
       const comments = item.comments || 0;
       const shares   = item.shares   || 0;
       const engage   = isTT ? likes + comments + shares : likes + comments;
-      const er       = views > 0 ? (engage / views * 100).toFixed(1) : '—';
+      const er       = views > 0 ? calcER(views, engage, 0) : '—';
       const erColor  = er !== '—' && parseFloat(er) >= 5 ? 'var(--green)' : er !== '—' && parseFloat(er) >= 2 ? 'var(--amber)' : 'var(--gray-3)';
       const dateStr  = item.date ? item.date.replace(/-/g,'.').slice(2) : '';
       const thumbHtml = item.thumb
@@ -2045,6 +2120,12 @@
     return d >= range.start && d <= range.end;
   }
 
+  function calcER(views, likes, comments) {
+    if (!views) return '—';
+    const val = (likes + comments) / views * 100;
+    return (val >= 100 ? Math.round(val) : val.toFixed(1)) + '%';
+  }
+
   function titleKey(title) {
     const words = (title || '').trim().split(/\s+/);
     return words.slice(0, 2).join('').toLowerCase();
@@ -2102,7 +2183,7 @@
       const totalViews    = items.reduce((s, v) => s + (v.views    || 0), 0);
       const totalLikes    = items.reduce((s, v) => s + (v.likes    || 0), 0);
       const totalComments = items.reduce((s, v) => s + (v.comments || 0), 0);
-      const er = totalViews > 0 ? ((totalLikes + totalComments) / totalViews * 100).toFixed(1) + '%' : '—';
+      const er = totalViews > 0 ? calcER(totalViews, totalLikes, totalComments) : '—';
       const erColor = parseFloat(er) >= 5 ? 'var(--green)' : 'var(--gray-4)';
       const pName  = { yt: 'YouTube', tt: 'TikTok', ig: 'Instagram' }[p];
       const pColor = { yt: 'var(--yt)', tt: 'var(--tt)', ig: 'var(--ig)' }[p];
@@ -2138,10 +2219,10 @@
         if (!item) return `<div style="flex:1;padding:12px;background:var(--gray-0);border-radius:8px;text-align:center;color:var(--gray-2);font-size:12px">—</div>`;
         const color  = { yt: 'var(--yt)', tt: 'var(--tt)', ig: 'var(--ig)' }[p];
         const pLabel = { yt: 'YouTube',   tt: 'TikTok',   ig: 'Instagram' }[p];
-        const er     = item.views > 0 ? ((item.likes + item.comments) / item.views * 100).toFixed(1) + '%' : '—';
+        const er     = item.views > 0 ? calcER(item.views, item.likes, item.comments) : '—';
         const erC    = parseFloat(er) >= 5 ? 'var(--green)' : 'var(--gray-3)';
         return `<div style="flex:1;padding:12px;background:var(--gray-0);border-radius:8px">
-          <div style="font-size:10px;font-weight:700;color:${color};margin-bottom:10px">${pLabel}</div>
+          <div style="font-size:11px;font-weight:700;color:${color};margin-bottom:10px">${pLabel}</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;text-align:center">
             <div><div style="font-size:16px;font-weight:800">${fmt(item.views || 0)}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">조회수</div></div>
             <div><div style="font-size:16px;font-weight:800">${fmt(item.likes || 0)}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">좋아요</div></div>
@@ -2184,13 +2265,13 @@
         <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">조회수</th>
         <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">좋아요</th>
         <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">댓글</th>
-        <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600"><span class="th-label-tip">ER<span class="th-tooltip-icon" data-tooltip="콘텐츠 단위 반응률 측정에 적합한 조회수 기반의 ER = (좋아요 + 댓글) / 조회수 × 100" aria-label="ER 안내">?</span></span></th>
+        <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600"><span class="th-label-tip">ER<span class="th-tooltip-icon" data-tooltip="콘텐츠 단위 반응률 측정에 적합한 조회수 기반의 참여율 ER = (좋아요 + 댓글) / 조회수 × 100" aria-label="ER 안내">?</span></span></th>
       </tr></thead>
       <tbody>${sorted.map(v => {
         const pName  = { yt: 'YouTube', tt: 'TikTok', ig: 'Instagram' }[v.platform];
         const pColor = { yt: 'var(--yt)', tt: 'var(--tt)', ig: 'var(--ig)' }[v.platform];
         const pBg    = { yt: 'var(--yt-bg)', tt: 'var(--tt-bg)', ig: 'var(--ig-bg)' }[v.platform];
-        const er     = v.views > 0 ? ((v.likes + v.comments) / v.views * 100).toFixed(1) + '%' : '—';
+        const er     = v.views > 0 ? calcER(v.views, v.likes, v.comments) : '—';
         const erC    = parseFloat(er) >= 5 ? 'var(--green)' : parseFloat(er) >= 2 ? 'var(--amber)' : 'var(--gray-3)';
         return `<tr style="border-bottom:1px solid var(--gray-1)">
           <td style="padding:10px 12px"><span style="background:${pBg};color:${pColor};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${pName}</span></td>
