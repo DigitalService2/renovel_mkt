@@ -2078,7 +2078,7 @@
         const erC    = parseFloat(er) >= 5 ? 'var(--green)' : 'var(--gray-3)';
         return `<div style="flex:1;padding:12px;background:var(--gray-0);border-radius:8px">
           <div style="font-size:10px;font-weight:700;color:${color};margin-bottom:10px">${pLabel}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
             <div><div style="font-size:16px;font-weight:800">${fmt(item.views || 0)}</div><div style="font-size:9px;color:var(--gray-3);margin-top:2px">조회수</div></div>
             <div><div style="font-size:16px;font-weight:800">${fmt(item.likes || 0)}</div><div style="font-size:9px;color:var(--gray-3);margin-top:2px">좋아요</div></div>
             <div><div style="font-size:16px;font-weight:800">${fmt(item.comments || 0)}</div><div style="font-size:9px;color:var(--gray-3);margin-top:2px">댓글</div></div>
