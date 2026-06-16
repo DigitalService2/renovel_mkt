@@ -455,7 +455,7 @@
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
       콘텐츠 목록
     </a>
-    <a class="nav-item" href="#">
+    <a class="nav-item" href="#" onclick="showPage('page-calendar');return false;" data-page="page-calendar">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
       콘텐츠 캘린더
     </a>
@@ -1349,6 +1349,78 @@
     </div>
   </div>
 
+  <!-- 콘텐츠 캘린더 페이지 -->
+  <div class="content" id="page-calendar" style="display:none">
+    <!-- 월 네비게이션 -->
+    <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:16px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button onclick="changeCalendarMonth(-1)" style="background:var(--gray-0);border:1px solid var(--gray-1);border-radius:8px;padding:6px 12px;font-size:16px;cursor:pointer;line-height:1">‹</button>
+        <div id="calendar-month-label" style="font-size:18px;font-weight:800;min-width:140px;text-align:center"></div>
+        <button onclick="changeCalendarMonth(1)" style="background:var(--gray-0);border:1px solid var(--gray-1);border-radius:8px;padding:6px 12px;font-size:16px;cursor:pointer;line-height:1">›</button>
+        <button onclick="goCalendarToday()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">오늘</button>
+      </div>
+      <button onclick="openCalendarModal()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">+ 일정 추가</button>
+    </div>
+
+    <!-- 캘린더 그리드 -->
+    <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);overflow:hidden">
+      <!-- 요일 헤더 -->
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);border-bottom:2px solid var(--gray-1)">
+        <div style="padding:10px 0;text-align:center;font-size:12px;font-weight:700;color:var(--red)">일</div>
+        <div style="padding:10px 0;text-align:center;font-size:12px;font-weight:700;color:var(--gray-4)">월</div>
+        <div style="padding:10px 0;text-align:center;font-size:12px;font-weight:700;color:var(--gray-4)">화</div>
+        <div style="padding:10px 0;text-align:center;font-size:12px;font-weight:700;color:var(--gray-4)">수</div>
+        <div style="padding:10px 0;text-align:center;font-size:12px;font-weight:700;color:var(--gray-4)">목</div>
+        <div style="padding:10px 0;text-align:center;font-size:12px;font-weight:700;color:var(--gray-4)">금</div>
+        <div style="padding:10px 0;text-align:center;font-size:12px;font-weight:700;color:#3B82F6">토</div>
+      </div>
+      <div id="calendar-grid" style="display:grid;grid-template-columns:repeat(7,1fr)"></div>
+    </div>
+  </div>
+
+  <!-- 캘린더 일정 모달 -->
+  <div id="cal-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:16px;padding:28px 32px;width:440px;max-width:94vw;box-shadow:0 8px 40px rgba(0,0,0,0.18)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div id="cal-modal-title" style="font-size:16px;font-weight:700">일정 추가</div>
+        <button onclick="closeCalendarModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray-3)">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--gray-4);display:block;margin-bottom:4px">날짜 <span style="color:var(--red)">*</span></label>
+          <input id="cal-date" type="date" style="width:100%;border:1px solid var(--gray-1);border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--gray-1)'" />
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--gray-4);display:block;margin-bottom:4px">콘텐츠 이름 <span style="color:var(--red)">*</span></label>
+          <input id="cal-title" type="text" placeholder="예: 현생 노잼 시기 완벽 극복!" style="width:100%;border:1px solid var(--gray-1);border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--gray-1)'" />
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--gray-4);display:block;margin-bottom:4px">플랫폼</label>
+          <select id="cal-platform" style="width:100%;border:1px solid var(--gray-1);border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;outline:none;background:#fff" onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--gray-1)'">
+            <option value="">선택 안함</option>
+            <option value="yt">YouTube</option>
+            <option value="tt">TikTok</option>
+            <option value="ig">Instagram</option>
+            <option value="all">전체 채널</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--gray-4);display:block;margin-bottom:4px">링크</label>
+          <input id="cal-url" type="url" placeholder="https://" style="width:100%;border:1px solid var(--gray-1);border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--gray-1)'" />
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--gray-4);display:block;margin-bottom:4px">담당자</label>
+          <input id="cal-assignee" type="text" placeholder="예: 김리나" style="width:100%;border:1px solid var(--gray-1);border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--gray-1)'" />
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button id="cal-delete-btn" onclick="deleteCalendarEvent()" style="display:none;flex:1;padding:10px;background:#fff;border:1px solid var(--red);border-radius:8px;font-size:13px;font-weight:700;color:var(--red);cursor:pointer;font-family:inherit">삭제</button>
+        <button onclick="closeCalendarModal()" style="flex:1;padding:10px;background:var(--gray-0);border:1px solid var(--gray-1);border-radius:8px;font-size:13px;font-weight:600;color:var(--gray-4);cursor:pointer;font-family:inherit">취소</button>
+        <button onclick="saveCalendarEvent()" style="flex:2;padding:10px;background:var(--navy);border:none;border-radius:8px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit">저장</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 성과 리포트 페이지 -->
   <div class="content" id="page-report" style="display:none">
 
@@ -1518,7 +1590,7 @@
   }
 
   // ── 페이지 전환 ──
-  const PAGES = ['page-dashboard','page-youtube','page-tiktok','page-instagram','page-report'];
+  const PAGES = ['page-dashboard','page-youtube','page-tiktok','page-instagram','page-report','page-calendar'];
 
   function showPage(id) {
     PAGES.forEach(p => {
@@ -1536,6 +1608,7 @@
       'page-tiktok':    'TikTok 채널 <span>@renovel.official</span>',
       'page-instagram': 'Instagram 채널 <span>@renovel.official</span>',
       'page-report':    '성과 리포트 <span>전체 채널 통합</span>',
+      'page-calendar':  '콘텐츠 캘린더 <span>업로드 일정 관리</span>',
     };
     const titleEl = document.querySelector('.header-title');
     if (titleEl && titles[id]) titleEl.innerHTML = titles[id];
@@ -1544,6 +1617,7 @@
     if (id === 'page-tiktok')    renderContentGrid('tt');
     if (id === 'page-instagram') renderContentGrid('ig');
     if (id === 'page-report')    renderReport();
+    if (id === 'page-calendar')  renderCalendar();
   }
 
   const EXPORT_NAMES = {
@@ -2143,7 +2217,10 @@
       }
     });
     loadManualData();
-    loadAllContentGrids(); // 대시보드 영상 수·총 조회수 초기 반영
+    loadAllContentGrids();
+    if (record.calendar?.length) {
+      localStorage.setItem('renovel_calendar', JSON.stringify(record.calendar));
+    }
   });
   // ── 성과 리포트 ──
   let _reportPeriod = 'weekly';
@@ -2348,6 +2425,167 @@
       }).join('')}</tbody>
     </table>`;
   }
+
+  // ── 콘텐츠 캘린더 ──
+  let _calYear  = new Date().getFullYear();
+  let _calMonth = new Date().getMonth(); // 0-based
+  let _calEditId = null;
+
+  function getCalendarEvents() {
+    return JSON.parse(localStorage.getItem('renovel_calendar') || '[]');
+  }
+
+  async function saveCalendarEvents(list) {
+    localStorage.setItem('renovel_calendar', JSON.stringify(list));
+    if (!_jbCache) await jbRead();
+    const record = { ..._jbCache, calendar: list };
+    await jbWrite(record);
+  }
+
+  function renderCalendar() {
+    const label = document.getElementById('calendar-month-label');
+    if (label) label.textContent = `${_calYear}년 ${_calMonth + 1}월`;
+
+    const grid = document.getElementById('calendar-grid');
+    if (!grid) return;
+
+    const events = getCalendarEvents();
+    const firstDay = new Date(_calYear, _calMonth, 1).getDay(); // 0=일
+    const daysInMonth = new Date(_calYear, _calMonth + 1, 0).getDate();
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+    const pColor = { yt:'var(--yt)', tt:'var(--tt)', ig:'var(--ig)', all:'var(--navy)' };
+    const pBg    = { yt:'var(--yt-bg)', tt:'var(--tt-bg)', ig:'var(--ig-bg)', all:'#EEF2FF' };
+    const pName  = { yt:'YT', tt:'TT', ig:'IG', all:'ALL' };
+
+    let cells = '';
+    // 앞 빈 칸
+    for (let i = 0; i < firstDay; i++) {
+      cells += `<div style="min-height:100px;border-right:1px solid var(--gray-1);border-bottom:1px solid var(--gray-1);background:var(--gray-0)"></div>`;
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${_calYear}-${String(_calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isToday = dateStr === todayStr;
+      const dow = (firstDay + d - 1) % 7;
+      const isSun = dow === 0, isSat = dow === 6;
+      const dayColor = isSun ? 'var(--red)' : isSat ? '#3B82F6' : 'var(--text)';
+      const dayEvents = events.filter(e => e.date === dateStr);
+
+      const eventHtml = dayEvents.map(e => {
+        const c = pColor[e.platform] || 'var(--gray-4)';
+        const bg = pBg[e.platform] || 'var(--gray-0)';
+        const badge = e.platform ? `<span style="font-size:9px;font-weight:700;color:${c};background:${bg};border-radius:3px;padding:1px 4px;margin-right:3px">${pName[e.platform]}</span>` : '';
+        return `<div onclick="openCalendarModal('${e.id}')" style="margin-top:3px;padding:3px 6px;background:${bg};border-left:3px solid ${c};border-radius:0 4px 4px 0;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)" title="${e.title}">${badge}${e.title}</div>`;
+      }).join('');
+
+      cells += `<div style="min-height:100px;border-right:1px solid var(--gray-1);border-bottom:1px solid var(--gray-1);padding:6px;${isToday?'background:#EEF2FF;':''}" onclick="openCalendarModalOnDate('${dateStr}')">
+        <div style="font-size:13px;font-weight:${isToday?'800':'600'};color:${isToday?'var(--navy)':dayColor};${isToday?'background:var(--navy);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;':''}">${d}</div>
+        ${eventHtml}
+      </div>`;
+    }
+
+    // 뒤 빈 칸 (7의 배수 맞추기)
+    const total = firstDay + daysInMonth;
+    const remainder = total % 7;
+    if (remainder !== 0) {
+      for (let i = 0; i < 7 - remainder; i++) {
+        cells += `<div style="min-height:100px;border-right:1px solid var(--gray-1);border-bottom:1px solid var(--gray-1);background:var(--gray-0)"></div>`;
+      }
+    }
+
+    grid.innerHTML = cells;
+  }
+
+  function changeCalendarMonth(delta) {
+    _calMonth += delta;
+    if (_calMonth > 11) { _calMonth = 0; _calYear++; }
+    if (_calMonth < 0)  { _calMonth = 11; _calYear--; }
+    renderCalendar();
+  }
+
+  function goCalendarToday() {
+    _calYear  = new Date().getFullYear();
+    _calMonth = new Date().getMonth();
+    renderCalendar();
+  }
+
+  function openCalendarModal(editId) {
+    _calEditId = editId || null;
+    const modal = document.getElementById('cal-modal');
+    const titleEl = document.getElementById('cal-modal-title');
+    const deleteBtn = document.getElementById('cal-delete-btn');
+
+    document.getElementById('cal-date').value     = '';
+    document.getElementById('cal-title').value    = '';
+    document.getElementById('cal-platform').value = '';
+    document.getElementById('cal-url').value      = '';
+    document.getElementById('cal-assignee').value = '';
+
+    if (editId) {
+      const ev = getCalendarEvents().find(e => e.id === editId);
+      if (ev) {
+        document.getElementById('cal-date').value     = ev.date     || '';
+        document.getElementById('cal-title').value    = ev.title    || '';
+        document.getElementById('cal-platform').value = ev.platform || '';
+        document.getElementById('cal-url').value      = ev.url      || '';
+        document.getElementById('cal-assignee').value = ev.assignee || '';
+      }
+      titleEl.textContent = '일정 수정';
+      deleteBtn.style.display = '';
+    } else {
+      titleEl.textContent = '일정 추가';
+      deleteBtn.style.display = 'none';
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  function openCalendarModalOnDate(dateStr) {
+    openCalendarModal();
+    document.getElementById('cal-date').value = dateStr;
+  }
+
+  function closeCalendarModal() {
+    document.getElementById('cal-modal').style.display = 'none';
+    _calEditId = null;
+  }
+
+  async function saveCalendarEvent() {
+    const date     = document.getElementById('cal-date').value.trim();
+    const title    = document.getElementById('cal-title').value.trim();
+    const platform = document.getElementById('cal-platform').value;
+    const url      = document.getElementById('cal-url').value.trim();
+    const assignee = document.getElementById('cal-assignee').value.trim();
+
+    if (!date || !title) { alert('날짜와 콘텐츠 이름은 필수입니다.'); return; }
+
+    const events = getCalendarEvents();
+    if (_calEditId) {
+      const idx = events.findIndex(e => e.id === _calEditId);
+      if (idx !== -1) events[idx] = { ...events[idx], date, title, platform, url, assignee };
+    } else {
+      events.push({ id: Date.now().toString(), date, title, platform, url, assignee });
+    }
+    await saveCalendarEvents(events);
+    closeCalendarModal();
+    renderCalendar();
+  }
+
+  async function deleteCalendarEvent() {
+    if (!_calEditId) return;
+    if (!confirm('이 일정을 삭제할까요?')) return;
+    const events = getCalendarEvents().filter(e => e.id !== _calEditId);
+    await saveCalendarEvents(events);
+    closeCalendarModal();
+    renderCalendar();
+  }
+
+  document.getElementById('cal-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeCalendarModal();
+  });
+
 
   loadYouTube();
   // 30분마다 자동 갱신
