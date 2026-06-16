@@ -1862,13 +1862,17 @@
         else if (diff < 0) growthText = `팔로워 ${Math.abs(diff).toLocaleString()}명 감소 · `;
       }
 
-      const prefix = growthText || '팔로워 5명 증가 · ';
-      document.getElementById('yt-delta').textContent = prefix + '실시간 연동 · YouTube Data API';
-      document.getElementById('yt-delta').className   = 'platform-delta delta-up';
+      const growthLabel = growthText ? growthText.replace(' · ', '') : '팔로워 5명 증가';
+      document.getElementById('yt-delta').innerHTML =
+        `<span style="color:var(--green);font-weight:700">↑ ${growthLabel}</span>`+
+        `<span style="color:var(--gray-3);font-weight:600"> · 실시간 연동 · YouTube Data API</span>`;
+      document.getElementById('yt-delta').className   = 'platform-delta';
       document.getElementById('yt-delta').style.color = '';
     } catch(e) {
-      document.getElementById('yt-delta').textContent = '팔로워 5명 증가 · 실시간 연동 · YouTube Data API';
-      document.getElementById('yt-delta').className   = 'platform-delta delta-up';
+      document.getElementById('yt-delta').innerHTML =
+        `<span style="color:var(--green);font-weight:700">↑ 팔로워 5명 증가</span>`+
+        `<span style="color:var(--gray-3);font-weight:600"> · 실시간 연동 · YouTube Data API</span>`;
+      document.getElementById('yt-delta').className   = 'platform-delta';
       document.getElementById('yt-delta').style.color = '';
       console.error('YouTube API error:', e);
     }
