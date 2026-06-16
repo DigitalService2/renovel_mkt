@@ -1282,7 +1282,10 @@
           <div style="font-size:15px;font-weight:700">업로드 콘텐츠</div>
           <div style="font-size:12px;color:var(--gray-3);margin-top:2px">TikTok 영상 URL을 추가하면 썸네일과 제목이 자동으로 불러와집니다</div>
         </div>
-        <button onclick="openContentModal('tt')" style="background:var(--tt);border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit">+ 콘텐츠 추가</button>
+        <div style="display:flex;gap:8px">
+          <button onclick="renderContentGrid('tt')" style="background:var(--gray-0);border:1px solid var(--gray-1);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;color:var(--gray-4);cursor:pointer;font-family:inherit">↻ 새로고침</button>
+          <button onclick="openContentModal('tt')" style="background:var(--tt);border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit">+ 콘텐츠 추가</button>
+        </div>
       </div>
       <div id="tt-video-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">
         <div style="text-align:center;padding:48px;color:var(--gray-3);grid-column:1/-1;border:2px dashed var(--gray-1);border-radius:10px">
@@ -1331,7 +1334,10 @@
           <div style="font-size:15px;font-weight:700">업로드 콘텐츠</div>
           <div style="font-size:12px;color:var(--gray-3);margin-top:2px">Instagram 게시물 URL과 지표를 직접 입력해 관리하세요</div>
         </div>
-        <button onclick="openContentModal('ig')" style="background:var(--ig);border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit">+ 콘텐츠 추가</button>
+        <div style="display:flex;gap:8px">
+          <button onclick="renderContentGrid('ig')" style="background:var(--gray-0);border:1px solid var(--gray-1);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;color:var(--gray-4);cursor:pointer;font-family:inherit">↻ 새로고침</button>
+          <button onclick="openContentModal('ig')" style="background:var(--ig);border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit">+ 콘텐츠 추가</button>
+        </div>
       </div>
       <div id="ig-video-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">
         <div style="text-align:center;padding:48px;color:var(--gray-3);grid-column:1/-1;border:2px dashed var(--gray-1);border-radius:10px">
