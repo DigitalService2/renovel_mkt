@@ -1209,7 +1209,7 @@
         <span style="background:var(--yt-bg);color:#FF0000;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">YouTube</span>
         <span id="yt-page-live" style="display:none;background:var(--green-bg);color:var(--green-d);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">● LIVE</span>
       </div>
-      <div style="font-size:13px;color:var(--gray-3);margin-top:3px" id="yt-page-updated">데이터 로딩 중...</div>
+      <div style="font-size:13px;font-weight:600;color:var(--green);margin-top:3px" id="yt-page-updated">데이터 로딩 중...</div>
     </div>
     <div style="display:flex;gap:28px">
       <div style="text-align:center">
@@ -1635,7 +1635,7 @@
       document.getElementById('yt-page-videos').textContent  = fmt(stats.videoCount);
       document.getElementById('yt-page-views').textContent   = fmt(stats.viewCount);
       document.getElementById('yt-page-live').style.display  = 'inline';
-      document.getElementById('yt-page-updated').textContent = '실시간 연동 · ' + new Date().toLocaleString('ko-KR', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' 기준';
+      document.getElementById('yt-page-updated').textContent = '실시간 연동 · YouTube Data API' + new Date().toLocaleString('ko-KR', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' 기준';
     } catch(e) {
       document.getElementById('yt-page-updated').textContent = '채널 통계 로드 실패 — F12 콘솔 확인';
       console.error('YT page channel error:', e);
@@ -1839,13 +1839,32 @@
       if (!chData.items?.length) throw new Error('채널 정보 없음');
       const stats  = chData.items[0].statistics;
 
-      document.getElementById('yt-subscribers').textContent  = fmt(stats.subscriberCount);
+      const currentSubs = parseInt(stats.subscriberCount || 0);
+      document.getElementById('yt-subscribers').textContent  = fmt(currentSubs);
       document.getElementById('yt-video-count').textContent  = fmt(stats.videoCount);
       document.getElementById('yt-view-count').textContent   = fmt(stats.viewCount);
-      document.getElementById('yt-delta').textContent        = '실시간 연동 · YouTube Data API';
-      document.getElementById('yt-delta').className          = 'platform-delta delta-up';
-      document.getElementById('yt-delta').style.color        = '';
       document.getElementById('yt-live-badge').style.display = 'inline';
+
+      // 30일 팔로워 증감 계산
+      const now = Date.now();
+      const stored = JSON.parse(localStorage.getItem('renovel_yt_subs_log') || '[]');
+      stored.push({ t: now, v: currentSubs });
+      // 30일 초과 기록 제거
+      const cutoff = now - 30 * 24 * 60 * 60 * 1000;
+      const trimmed = stored.filter(r => r.t >= cutoff);
+      localStorage.setItem('renovel_yt_subs_log', JSON.stringify(trimmed));
+
+      let growthText = '';
+      if (trimmed.length >= 2) {
+        const oldest = trimmed[0].v;
+        const diff = currentSubs - oldest;
+        if (diff > 0)      growthText = `팔로워 ${diff.toLocaleString()}명 증가 · `;
+        else if (diff < 0) growthText = `팔로워 ${Math.abs(diff).toLocaleString()}명 감소 · `;
+      }
+
+      document.getElementById('yt-delta').textContent = growthText + '실시간 연동 · YouTube Data API';
+      document.getElementById('yt-delta').className   = 'platform-delta delta-up';
+      document.getElementById('yt-delta').style.color = '';
     } catch(e) {
       document.getElementById('yt-delta').textContent = 'API 연동 오류 — 키를 확인해주세요';
       document.getElementById('yt-delta').style.color = 'var(--red)';
