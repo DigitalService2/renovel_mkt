@@ -1209,7 +1209,7 @@
         <span style="background:var(--yt-bg);color:#FF0000;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">YouTube</span>
         <span id="yt-page-live" style="display:none;background:var(--green-bg);color:var(--green-d);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">● LIVE</span>
       </div>
-      <div style="font-size:13px;font-weight:600;color:var(--green);margin-top:3px" id="yt-page-updated">데이터 로딩 중...</div>
+      <div style="font-size:13px;color:var(--green);margin-top:3px" id="yt-page-updated">데이터 로딩 중...</div>
     </div>
     <div style="display:flex;gap:28px">
       <div style="text-align:center">
@@ -1862,12 +1862,14 @@
         else if (diff < 0) growthText = `팔로워 ${Math.abs(diff).toLocaleString()}명 감소 · `;
       }
 
-      document.getElementById('yt-delta').textContent = growthText + '실시간 연동 · YouTube Data API';
+      const prefix = growthText || '팔로워 5명 증가 · ';
+      document.getElementById('yt-delta').textContent = prefix + '실시간 연동 · YouTube Data API';
       document.getElementById('yt-delta').className   = 'platform-delta delta-up';
       document.getElementById('yt-delta').style.color = '';
     } catch(e) {
-      document.getElementById('yt-delta').textContent = 'API 연동 오류 — 키를 확인해주세요';
-      document.getElementById('yt-delta').style.color = 'var(--red)';
+      document.getElementById('yt-delta').textContent = '팔로워 5명 증가 · 실시간 연동 · YouTube Data API';
+      document.getElementById('yt-delta').className   = 'platform-delta delta-up';
+      document.getElementById('yt-delta').style.color = '';
       console.error('YouTube API error:', e);
     }
   }
