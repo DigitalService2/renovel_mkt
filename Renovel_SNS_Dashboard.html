@@ -2791,12 +2791,12 @@
     const sorted = [...filtered].sort((a, b) => (b.views || 0) - (a.views || 0));
     tableEl.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px">
       <thead><tr style="border-bottom:2px solid var(--gray-1)">
-        <th style="text-align:left;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">플랫폼</th>
-        <th style="text-align:left;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">콘텐츠</th>
+        <th style="text-align:center;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">플랫폼</th>
+        <th style="text-align:center;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">콘텐츠</th>
         <th style="text-align:center;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">업로드 날짜</th>
-        <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">조회수</th>
-        <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">좋아요</th>
-        <th style="text-align:right;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">댓글</th>
+        <th style="text-align:center;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">조회수</th>
+        <th style="text-align:center;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">좋아요</th>
+        <th style="text-align:center;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600">댓글</th>
         <th style="text-align:center;padding:8px 12px;font-size:11px;color:var(--gray-3);font-weight:600"><span class="th-label-tip">ER<span class="th-tooltip-icon" data-tooltip="콘텐츠 단위 반응률 측정에 적합한 조회수 기반의 참여율 ER = (좋아요 + 댓글) / 조회수 × 100" aria-label="ER 안내">?</span></span></th>
       </tr></thead>
       <tbody>${sorted.map(v => {
