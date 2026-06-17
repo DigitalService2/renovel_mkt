@@ -2757,7 +2757,7 @@
           </div>
         </div>`;
       };
-      crossEl.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">` + crossItems.map(g => {
+      crossEl.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">` + crossItems.map(g => {
         const yt = g.items.find(i => i.platform === 'yt');
         const tt = g.items.find(i => i.platform === 'tt');
         const ig = g.items.find(i => i.platform === 'ig');
