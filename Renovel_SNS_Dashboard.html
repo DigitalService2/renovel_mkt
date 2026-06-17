@@ -1292,7 +1292,7 @@
   <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:24px 28px;margin-top:20px;margin-bottom:40px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <div>
-        <div style="font-size:15px;font-weight:700">업로드 콘텐츠</div>
+        <div style="font-size:15px;font-weight:700">전체 콘텐츠</div>
         <div style="font-size:12px;color:var(--gray-3);margin-top:2px">최근 업로드 순 · YouTube Data API 실시간 연동</div>
       </div>
       <button onclick="loadYouTubePage()" style="background:var(--gray-0);border:1px solid var(--gray-1);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;color:var(--gray-4);cursor:pointer;font-family:inherit">↻ 새로고침</button>
@@ -1340,7 +1340,7 @@
     <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:24px 28px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
         <div>
-          <div style="font-size:15px;font-weight:700">업로드 콘텐츠</div>
+          <div style="font-size:15px;font-weight:700">전체 콘텐츠</div>
           <div style="font-size:12px;color:var(--gray-3);margin-top:2px">TikTok 영상 URL을 추가하면 썸네일과 제목이 자동으로 불러와집니다</div>
         </div>
         <div style="display:flex;gap:8px">
@@ -1392,7 +1392,7 @@
     <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:24px 28px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
         <div>
-          <div style="font-size:15px;font-weight:700">업로드 콘텐츠</div>
+          <div style="font-size:15px;font-weight:700">전체 콘텐츠</div>
           <div style="font-size:12px;color:var(--gray-3);margin-top:2px">Instagram 게시물 URL과 지표를 직접 입력해 관리하세요</div>
         </div>
         <div style="display:flex;gap:8px">
@@ -1499,6 +1499,31 @@
 
     <!-- 채널별 요약 KPI -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px" id="report-kpi-row"></div>
+
+    <!-- 플랫폼 별 성과 차트 -->
+    <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:24px 28px;margin-bottom:20px" id="report-platform-chart-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:15px;font-weight:700">플랫폼 별 성과</div>
+          <div style="font-size:12px;color:var(--gray-3);margin-top:2px">업로드 날짜 기준 · 콘텐츠 조회수 누적 추이</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button id="rleg-yt" onclick="reportChartToggle('yt')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1.5px solid var(--yt);background:var(--yt-bg);color:var(--yt);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
+            <span style="display:inline-block;width:10px;height:2.5px;background:var(--yt);border-radius:2px"></span>YouTube
+          </button>
+          <button id="rleg-tt" onclick="reportChartToggle('tt')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1.5px solid var(--tt);background:var(--tt-bg);color:var(--tt);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
+            <span style="display:inline-block;width:10px;height:2.5px;background:var(--tt);border-radius:2px"></span>TikTok
+          </button>
+          <button id="rleg-ig" onclick="reportChartToggle('ig')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1.5px solid var(--ig);background:var(--ig-bg);color:var(--ig);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
+            <span style="display:inline-block;width:10px;height:2.5px;background:var(--ig);border-radius:2px"></span>Instagram
+          </button>
+        </div>
+      </div>
+      <div style="position:relative" id="report-chart-container">
+        <div id="report-chart-svg-wrap" style="width:100%;overflow:hidden"></div>
+        <div id="report-chart-tooltip" style="position:absolute;display:none;background:rgba(15,23,42,0.88);color:#fff;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:600;pointer-events:none;white-space:nowrap;z-index:10;transform:translateX(-50%)"></div>
+      </div>
+    </div>
 
     <!-- 전체 콘텐츠 성과표 -->
     <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:24px 28px;margin-bottom:20px">
@@ -2644,6 +2669,9 @@
     ];
     const filtered = allItems.filter(v => inPeriod(v.date, range));
 
+    // 플랫폼 별 성과 차트
+    renderPlatformChart(allItems);
+
     // KPI 카드
     const kpiRow = document.getElementById('report-kpi-row');
     kpiRow.innerHTML = ['yt', 'tt', 'ig'].map(p => {
@@ -2760,6 +2788,142 @@
         </tr>`;
       }).join('')}</tbody>
     </table>`;
+  }
+
+  // ── 플랫폼 별 성과 차트 ──
+  let _reportChartData = null;
+  const _reportChartVis = { yt: true, tt: true, ig: true };
+  const _reportPlatformCfg = [
+    { key: 'yt', color: '#EF4444', label: 'YouTube'   },
+    { key: 'tt', color: '#9333EA', label: 'TikTok'    },
+    { key: 'ig', color: '#E91E8C', label: 'Instagram' },
+  ];
+
+  function reportChartToggle(key) {
+    _reportChartVis[key] = !_reportChartVis[key];
+    const btn = document.getElementById('rleg-' + key);
+    if (btn) btn.style.opacity = _reportChartVis[key] ? '1' : '0.35';
+    _drawReportChart();
+  }
+
+  function renderPlatformChart(allItems) {
+    const dateSet = new Set(allItems.map(v => v.date).filter(Boolean));
+    const dates = [...dateSet].sort();
+    const sec = document.getElementById('report-platform-chart-section');
+    if (!dates.length) { if (sec) sec.style.display = 'none'; return; }
+    if (sec) sec.style.display = 'block';
+
+    const series = {};
+    _reportPlatformCfg.forEach(p => {
+      const byDate = {};
+      allItems.filter(v => v.platform === p.key).forEach(v => {
+        if (v.date) byDate[v.date] = (byDate[v.date] || 0) + (v.views || 0);
+      });
+      series[p.key] = dates.filter(d => byDate[d] != null).map(d => ({ date: d, val: byDate[d] }));
+    });
+
+    _reportChartData = { dates, series };
+    _drawReportChart();
+  }
+
+  function _drawReportChart() {
+    const chartData = _reportChartData;
+    if (!chartData) return;
+    const wrap = document.getElementById('report-chart-svg-wrap');
+    if (!wrap) return;
+
+    const { dates, series } = chartData;
+    const W = wrap.clientWidth || 760;
+    const H = 240;
+    const PAD = { top: 16, right: 24, bottom: 44, left: 56 };
+    const cW = W - PAD.left - PAD.right;
+    const cH = H - PAD.top - PAD.bottom;
+
+    const dateMin = new Date(dates[0]);
+    const dateMax = new Date(dates[dates.length - 1]);
+    const dateRange = Math.max(dateMax - dateMin, 1);
+    const xByDate = d => PAD.left + ((new Date(d) - dateMin) / dateRange) * cW;
+
+    const allVals = _reportPlatformCfg
+      .filter(p => _reportChartVis[p.key])
+      .flatMap(p => (series[p.key] || []).map(s => s.val));
+    const globalMax = Math.max(...allVals, 1);
+
+    const tickCount = 4;
+    const rawStep = globalMax / tickCount;
+    const mag = Math.pow(10, Math.floor(Math.log10(rawStep || 1)));
+    const niceStep = Math.ceil(rawStep / mag) * mag || 1;
+    const yPos = val => PAD.top + cH - (val / (niceStep * tickCount)) * cH;
+
+    const smoothPath = pts => {
+      if (pts.length < 2) return '';
+      let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+      for (let i = 1; i < pts.length; i++) {
+        const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+        const cpx = ((x0 + x1) / 2).toFixed(1);
+        d += ` C ${cpx} ${y0.toFixed(1)}, ${cpx} ${y1.toFixed(1)}, ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+      }
+      return d;
+    };
+
+    let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="width:100%;max-width:100%;display:block;overflow:visible">`;
+
+    for (let i = 0; i <= tickCount; i++) {
+      const tick = i * niceStep;
+      const y = yPos(tick);
+      if (y < PAD.top - 2 || y > PAD.top + cH + 2) continue;
+      svg += `<line x1="${PAD.left}" y1="${y.toFixed(1)}" x2="${PAD.left + cW}" y2="${y.toFixed(1)}" stroke="#F1F5F9" stroke-width="1"/>`;
+      const label = tick >= 10000 ? (tick / 10000).toFixed(tick % 10000 === 0 ? 0 : 1) + '만'
+                  : tick >= 1000  ? (tick / 1000).toFixed(tick % 1000  === 0 ? 0 : 1) + 'k'
+                  : tick.toString();
+      svg += `<text x="${PAD.left - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="10" fill="#94A3B8" font-family="inherit">${label}</text>`;
+    }
+
+    svg += `<line x1="${PAD.left}" y1="${PAD.top + cH}" x2="${PAD.left + cW}" y2="${PAD.top + cH}" stroke="#E2E8F0" stroke-width="1"/>`;
+
+    _reportPlatformCfg.forEach(p => {
+      if (!_reportChartVis[p.key]) return;
+      const pts = (series[p.key] || []).map(s => [xByDate(s.date), yPos(s.val)]);
+      if (!pts.length) return;
+      const pathD = smoothPath(pts);
+      if (pts.length >= 2) {
+        const areaClose = ` L ${pts[pts.length-1][0].toFixed(1)} ${(PAD.top + cH).toFixed(1)} L ${pts[0][0].toFixed(1)} ${(PAD.top + cH).toFixed(1)} Z`;
+        svg += `<path d="${pathD}${areaClose}" fill="${p.color}" fill-opacity="0.07"/>`;
+        svg += `<path d="${pathD}" fill="none" stroke="${p.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+      }
+      (series[p.key] || []).forEach((s, i) => {
+        const [cx, cy] = pts[i];
+        const tipDate = s.date.replace(/-/g, '.').substring(2);
+        svg += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="4.5" fill="${p.color}" stroke="#fff" stroke-width="2"
+          onmouseenter="reportChartShowTip(event,'${tipDate}','${p.label}','${fmt(s.val)}')"
+          onmouseleave="reportChartHideTip()" style="cursor:pointer"/>`;
+      });
+    });
+
+    const step = Math.max(1, Math.ceil(dates.length / 8));
+    dates.forEach((d, i) => {
+      if (i % step !== 0 && i !== dates.length - 1) return;
+      svg += `<text x="${xByDate(d).toFixed(1)}" y="${PAD.top + cH + 16}" text-anchor="middle" font-size="10" fill="#94A3B8" font-family="inherit">${d.substring(5).replace('-', '/')}</text>`;
+    });
+
+    svg += '</svg>';
+    wrap.innerHTML = svg;
+  }
+
+  function reportChartShowTip(e, date, platform, val) {
+    const tip  = document.getElementById('report-chart-tooltip');
+    const wrap = document.getElementById('report-chart-container');
+    if (!tip || !wrap) return;
+    const rect = wrap.getBoundingClientRect();
+    tip.innerHTML = `<div style="font-size:10px;font-weight:400;color:rgba(255,255,255,.6);margin-bottom:2px">${date} · ${platform}</div><span>조회수 ${val}</span>`;
+    tip.style.display = 'block';
+    tip.style.left = (e.clientX - rect.left) + 'px';
+    tip.style.top  = (e.clientY - rect.top - 52) + 'px';
+  }
+
+  function reportChartHideTip() {
+    const tip = document.getElementById('report-chart-tooltip');
+    if (tip) tip.style.display = 'none';
   }
 
   // ── 콘텐츠 캘린더 ──
