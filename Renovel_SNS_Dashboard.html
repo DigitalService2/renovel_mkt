@@ -1243,6 +1243,38 @@
       </div>
     </div>
   </div>
+
+  <!-- TOP 3 섹션 -->
+  <div style="display:none;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px" id="yt-top3-section">
+    <!-- 조회수 TOP 3 -->
+    <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:20px 24px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+        <span style="color:var(--yt)">▶</span> 조회수 TOP 3
+      </div>
+      <div id="yt-top-views"></div>
+    </div>
+    <!-- 좋아요 TOP 3 -->
+    <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:20px 24px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+        <span style="color:var(--yt)">👍</span> 좋아요 TOP 3
+      </div>
+      <div id="yt-top-likes"></div>
+    </div>
+    <!-- 댓글 TOP 3 -->
+    <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:20px 24px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+        <span style="color:var(--yt)">💬</span> 댓글 TOP 3
+      </div>
+      <div id="yt-top-comments"></div>
+    </div>
+    <!-- 공유 TOP 3 -->
+    <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:20px 24px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+        <span style="color:var(--yt)">🔗</span> 공유 TOP 3
+      </div>
+      <div id="yt-top-shares"></div>
+    </div>
+  </div>
   </div>
 
   <!-- TikTok 페이지 -->
@@ -1794,6 +1826,39 @@
           </div>`;
         grid.appendChild(card);
       });
+
+      // TOP 3 렌더링
+      const videos = vData.items.map(v => ({
+        id: v.id,
+        title: v.snippet.title,
+        thumb: v.snippet.thumbnails?.medium?.url || '',
+        url: 'https://www.youtube.com/watch?v=' + v.id,
+        views:    parseInt(v.statistics.viewCount    || 0),
+        likes:    parseInt(v.statistics.likeCount    || 0),
+        comments: parseInt(v.statistics.commentCount || 0),
+        shares: 0,
+      }));
+
+      const renderTop3 = (elId, sortKey, valueLabel, color) => {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const sorted = [...videos].sort((a, b) => b[sortKey] - a[sortKey]).slice(0, 3);
+        el.innerHTML = sorted.map((v, i) => `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 0;${i < 2 ? 'border-bottom:1px solid var(--gray-1);' : ''}">
+            <div style="font-size:18px;font-weight:900;color:${i===0?'var(--yt)':'var(--gray-2)'};width:20px;text-align:center;flex-shrink:0">${i+1}</div>
+            <img src="${v.thumb}" style="width:52px;height:36px;border-radius:4px;object-fit:cover;flex-shrink:0" />
+            <div style="flex:1;min-width:0">
+              <a href="${v.url}" target="_blank" style="font-size:12px;font-weight:600;color:var(--text);text-decoration:none;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden">${v.title}</a>
+              <div style="font-size:12px;font-weight:800;color:${color};margin-top:2px">${fmt(v[sortKey])} <span style="font-size:10px;font-weight:400;color:var(--gray-3)">${valueLabel}</span></div>
+            </div>
+          </div>`).join('');
+      };
+
+      document.getElementById('yt-top3-section').style.display = 'grid';
+      renderTop3('yt-top-views',    'views',    '조회', 'var(--yt)');
+      renderTop3('yt-top-likes',    'likes',    '좋아요', '#F59E0B');
+      renderTop3('yt-top-comments', 'comments', '댓글',  '#3B82F6');
+      renderTop3('yt-top-shares',   'shares',   '공유',  'var(--green)');
 
     } catch(e) {
       grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--gray-3);grid-column:1/-1;border:2px dashed var(--gray-1);border-radius:10px">
