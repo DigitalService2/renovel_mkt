@@ -2766,11 +2766,10 @@
         return `<div style="border:1px solid var(--gray-1);border-radius:12px;padding:20px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1.6fr;gap:20px;align-items:start">
           <!-- 좌측: 콘텐츠 정보 -->
           <div style="display:flex;flex-direction:column;gap:12px">
-            ${rep.thumb ? `<img src="${rep.thumb}" style="width:100%;aspect-ratio:16/9;border-radius:8px;object-fit:cover">` : ''}
+            ${rep.thumb ? `<img src="${rep.thumb}" style="width:50%;aspect-ratio:16/9;border-radius:8px;object-fit:cover">` : ''}
             <div>
               <div style="font-size:14px;font-weight:700;line-height:1.5;margin-bottom:6px">${rep.title}</div>
-              <div style="font-size:11px;color:var(--gray-3);margin-bottom:4px">총 조회수 <strong style="color:var(--text)">${fmt(totalViews)}</strong></div>
-              <div style="font-size:11px;color:var(--gray-3)">${g.items.length}개 플랫폼 게시</div>
+              <div style="font-size:11px;color:var(--gray-3)">총 조회수 <strong style="color:var(--text)">${fmt(totalViews)}</strong></div>
             </div>
           </div>
           <!-- 우측: 플랫폼별 성과 (세로 나열) -->
