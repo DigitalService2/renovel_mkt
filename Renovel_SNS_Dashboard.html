@@ -2763,7 +2763,7 @@
         const ig = g.items.find(i => i.platform === 'ig');
         const rep = yt || tt || ig;
         const totalViews = g.items.reduce((s, i) => s + (i.views || 0), 0);
-        return `<div style="border:1px solid var(--gray-1);border-radius:12px;padding:20px;display:grid;grid-template-columns:160px 1fr;gap:20px;align-items:start">
+        return `<div style="border:1px solid var(--gray-1);border-radius:12px;padding:20px;display:grid;grid-template-columns:480px 1fr;gap:20px;align-items:start">
           <!-- 좌측: 콘텐츠 정보 -->
           <div style="display:flex;flex-direction:column;gap:12px">
             ${rep.thumb ? `<img src="${rep.thumb}" style="width:100%;aspect-ratio:16/9;border-radius:8px;object-fit:cover">` : ''}
