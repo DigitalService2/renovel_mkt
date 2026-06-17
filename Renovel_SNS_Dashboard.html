@@ -1711,7 +1711,7 @@
       document.getElementById('yt-page-views').textContent   = fmt(stats.viewCount);
       document.getElementById('yt-page-live').style.display  = 'inline';
       document.getElementById('yt-page-updated').innerHTML =
-        `<span style="color:var(--gray-3)">실시간 연동 · YouTube Data API · ${new Date().toLocaleString('ko-KR', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})} 기준</span>`;
+        `<span style="color:var(--green);font-weight:600">${new Date().toLocaleString('ko-KR', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})} 기준</span><span style="color:var(--gray-3)"> · 실시간 연동 · YouTube Data API</span>`;
     } catch(e) {
       document.getElementById('yt-page-updated').textContent = '채널 통계 로드 실패 — F12 콘솔 확인';
       console.error('YT page channel error:', e);
