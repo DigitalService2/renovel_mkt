@@ -2735,18 +2735,25 @@
       crossEl.innerHTML = `<div style="text-align:center;padding:32px;color:var(--gray-3);border:2px dashed var(--gray-1);border-radius:10px;font-size:13px">2주 이내 동일 콘텐츠(제목 첫 글자 일치)가 없습니다</div>`;
     } else {
       const platformBadge = (item, p) => {
-        if (!item) return `<div style="flex:1;padding:12px;background:var(--gray-0);border-radius:8px;text-align:center;color:var(--gray-2);font-size:12px">—</div>`;
         const color  = { yt: 'var(--yt)', tt: 'var(--tt)', ig: 'var(--ig)' }[p];
-        const pLabel = { yt: 'YouTube',   tt: 'TikTok',   ig: 'Instagram' }[p];
-        const er     = item.views > 0 ? calcER(item.views, item.likes, item.comments) : '—';
-        const erC    = parseFloat(er) >= 5 ? 'var(--green)' : 'var(--gray-3)';
-        return `<div style="flex:1;padding:12px;background:var(--gray-0);border-radius:8px">
-          <div style="font-size:11px;font-weight:700;color:${color};margin-bottom:10px">${pLabel}</div>
+        const pBg    = { yt: 'var(--yt-bg)', tt: 'var(--tt-bg)', ig: 'var(--ig-bg)' }[p];
+        const pLabel = { yt: 'YouTube', tt: 'TikTok', ig: 'Instagram' }[p];
+        if (!item) return `<div style="padding:12px 14px;background:var(--gray-0);border-radius:8px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;font-weight:700;color:var(--gray-2);background:var(--gray-1);padding:2px 8px;border-radius:20px">${pLabel}</span>
+          <span style="font-size:12px;color:var(--gray-2)">데이터 없음</span>
+        </div>`;
+        const er  = item.views > 0 ? calcER(item.views, item.likes, item.comments) : '—';
+        const erC = parseFloat(er) >= 5 ? 'var(--green)' : 'var(--gray-3)';
+        return `<div style="padding:12px 14px;background:var(--gray-0);border-radius:8px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="font-size:11px;font-weight:700;color:${color};background:${pBg};padding:2px 8px;border-radius:20px">${pLabel}</span>
+            ${item.date ? `<span style="font-size:11px;color:var(--gray-3)">${item.date.slice(0,10).replace(/-/g,'.')}</span>` : ''}
+          </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;text-align:center">
-            <div><div style="font-size:16px;font-weight:800">${fmt(item.views || 0)}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">조회수</div></div>
-            <div><div style="font-size:16px;font-weight:800">${fmt(item.likes || 0)}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">좋아요</div></div>
-            <div><div style="font-size:16px;font-weight:800">${fmt(item.comments || 0)}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">댓글</div></div>
-            <div><div style="font-size:16px;font-weight:800;color:${erC}">${er}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">ER</div></div>
+            <div><div style="font-size:15px;font-weight:800">${fmt(item.views||0)}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">조회수</div></div>
+            <div><div style="font-size:15px;font-weight:800">${fmt(item.likes||0)}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">좋아요</div></div>
+            <div><div style="font-size:15px;font-weight:800">${fmt(item.comments||0)}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">댓글</div></div>
+            <div><div style="font-size:15px;font-weight:800;color:${erC}">${er}</div><div style="font-size:10px;color:var(--gray-3);margin-top:2px">ER</div></div>
           </div>
         </div>`;
       };
@@ -2756,15 +2763,22 @@
         const ig = g.items.find(i => i.platform === 'ig');
         const rep = yt || tt || ig;
         const totalViews = g.items.reduce((s, i) => s + (i.views || 0), 0);
-        return `<div style="border:1px solid var(--gray-1);border-radius:10px;padding:16px 20px;margin-bottom:12px">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-            ${rep.thumb ? `<img src="${rep.thumb}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;flex-shrink:0">` : ''}
-            <div style="flex:1">
-              <div style="font-size:14px;font-weight:700;margin-bottom:4px">${rep.title}</div>
-              <div style="font-size:11px;color:var(--gray-3)">총 조회수 <strong style="color:var(--text)">${fmt(totalViews)}</strong> · ${g.items.length}개 플랫폼</div>
+        return `<div style="border:1px solid var(--gray-1);border-radius:12px;padding:20px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1.6fr;gap:20px;align-items:start">
+          <!-- 좌측: 콘텐츠 정보 -->
+          <div style="display:flex;flex-direction:column;gap:12px">
+            ${rep.thumb ? `<img src="${rep.thumb}" style="width:100%;aspect-ratio:16/9;border-radius:8px;object-fit:cover">` : ''}
+            <div>
+              <div style="font-size:14px;font-weight:700;line-height:1.5;margin-bottom:6px">${rep.title}</div>
+              <div style="font-size:11px;color:var(--gray-3);margin-bottom:4px">총 조회수 <strong style="color:var(--text)">${fmt(totalViews)}</strong></div>
+              <div style="font-size:11px;color:var(--gray-3)">${g.items.length}개 플랫폼 게시</div>
             </div>
           </div>
-          <div style="display:flex;gap:8px">${platformBadge(yt,'yt')}${platformBadge(tt,'tt')}${platformBadge(ig,'ig')}</div>
+          <!-- 우측: 플랫폼별 성과 (세로 나열) -->
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${platformBadge(yt,'yt')}
+            ${platformBadge(tt,'tt')}
+            ${platformBadge(ig,'ig')}
+          </div>
         </div>`;
       }).join('');
     }
