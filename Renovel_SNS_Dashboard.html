@@ -2807,9 +2807,10 @@
   }
 
   function renderPlatformChart(allItems) {
+    const sec = document.getElementById('report-platform-chart-section');
+    if (_reportPeriod === 'daily') { if (sec) sec.style.display = 'none'; return; }
     const dateSet = new Set(allItems.map(v => v.date).filter(Boolean));
     const dates = [...dateSet].sort();
-    const sec = document.getElementById('report-platform-chart-section');
     if (!dates.length) { if (sec) sec.style.display = 'none'; return; }
     if (sec) sec.style.display = 'block';
 
