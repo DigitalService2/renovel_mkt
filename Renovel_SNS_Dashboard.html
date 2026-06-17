@@ -2779,7 +2779,7 @@
             ${platformBadge(ig,'ig')}
           </div>
         </div>`;
-      }).join('') + `</div>`;
+      }).join('') + (crossItems.length % 2 !== 0 ? '<div></div>' : '') + `</div>`;
     }
 
     // 전체 콘텐츠 성과표
