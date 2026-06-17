@@ -1505,7 +1505,7 @@
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
         <div>
           <div style="font-size:15px;font-weight:700">플랫폼 별 성과</div>
-          <div style="font-size:12px;color:var(--gray-3);margin-top:2px">업로드 날짜 기준 · 콘텐츠 조회수 누적 추이</div>
+          <div style="font-size:12px;color:var(--gray-3);margin-top:2px">업로드 날짜 기준 · 조회수+좋아요+댓글+저장+공유 합산</div>
         </div>
         <div style="display:flex;gap:6px">
           <button id="rleg-yt" onclick="reportChartToggle('yt')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1.5px solid var(--yt);background:var(--yt-bg);color:var(--yt);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
@@ -2817,9 +2817,17 @@
     _reportPlatformCfg.forEach(p => {
       const byDate = {};
       allItems.filter(v => v.platform === p.key).forEach(v => {
-        if (v.date) byDate[v.date] = (byDate[v.date] || 0) + (v.views || 0);
+        if (!v.date) return;
+        const total = (v.views||0) + (v.likes||0) + (v.comments||0) + (v.saves||0) + (v.shares||0);
+        if (!byDate[v.date]) byDate[v.date] = { total:0, views:0, likes:0, comments:0, saves:0, shares:0 };
+        byDate[v.date].total    += total;
+        byDate[v.date].views    += (v.views    || 0);
+        byDate[v.date].likes    += (v.likes    || 0);
+        byDate[v.date].comments += (v.comments || 0);
+        byDate[v.date].saves    += (v.saves    || 0);
+        byDate[v.date].shares   += (v.shares   || 0);
       });
-      series[p.key] = dates.filter(d => byDate[d] != null).map(d => ({ date: d, val: byDate[d] }));
+      series[p.key] = dates.filter(d => byDate[d]).map(d => ({ date: d, val: byDate[d].total, ...byDate[d] }));
     });
 
     _reportChartData = { dates, series };
@@ -2894,8 +2902,9 @@
       (series[p.key] || []).forEach((s, i) => {
         const [cx, cy] = pts[i];
         const tipDate = s.date.replace(/-/g, '.').substring(2);
+        const breakdown = `조회${fmt(s.views||0)}·좋아요${fmt(s.likes||0)}·댓글${fmt(s.comments||0)}·저장${fmt(s.saves||0)}·공유${fmt(s.shares||0)}`;
         svg += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="4.5" fill="${p.color}" stroke="#fff" stroke-width="2"
-          onmouseenter="reportChartShowTip(event,'${tipDate}','${p.label}','${fmt(s.val)}')"
+          onmouseenter="reportChartShowTip(event,'${tipDate}','${p.label}','${fmt(s.val)}','${breakdown}')"
           onmouseleave="reportChartHideTip()" style="cursor:pointer"/>`;
       });
     });
@@ -2910,15 +2919,17 @@
     wrap.innerHTML = svg;
   }
 
-  function reportChartShowTip(e, date, platform, val) {
+  function reportChartShowTip(e, date, platform, val, breakdown) {
     const tip  = document.getElementById('report-chart-tooltip');
     const wrap = document.getElementById('report-chart-container');
     if (!tip || !wrap) return;
     const rect = wrap.getBoundingClientRect();
-    tip.innerHTML = `<div style="font-size:10px;font-weight:400;color:rgba(255,255,255,.6);margin-bottom:2px">${date} · ${platform}</div><span>조회수 ${val}</span>`;
+    tip.innerHTML = `<div style="font-size:10px;font-weight:400;color:rgba(255,255,255,.6);margin-bottom:3px">${date} · ${platform}</div>`
+      + `<div style="font-size:13px;font-weight:800;margin-bottom:4px">합계 ${val}</div>`
+      + `<div style="font-size:10px;font-weight:400;color:rgba(255,255,255,.7)">${breakdown}</div>`;
     tip.style.display = 'block';
     tip.style.left = (e.clientX - rect.left) + 'px';
-    tip.style.top  = (e.clientY - rect.top - 52) + 'px';
+    tip.style.top  = (e.clientY - rect.top - 68) + 'px';
   }
 
   function reportChartHideTip() {
