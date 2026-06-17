@@ -2600,11 +2600,23 @@
 
   function getPeriodRange(period) {
     const now = new Date();
-    const start = new Date(now);
-    if (period === 'daily')   start.setDate(now.getDate() - 1);
-    if (period === 'weekly')  start.setDate(now.getDate() - 7);
-    if (period === 'monthly') start.setMonth(now.getMonth() - 1);
-    return { start, end: now };
+    if (period === 'daily') {
+      const start = new Date(now); start.setDate(now.getDate() - 1);
+      return { start, end: now };
+    }
+    if (period === 'weekly') {
+      const day = now.getDay(); // 0=일, 1=월 ...
+      const diffToMon = (day === 0 ? -6 : 1 - day);
+      const start = new Date(now); start.setDate(now.getDate() + diffToMon); start.setHours(0,0,0,0);
+      const end   = new Date(start); end.setDate(start.getDate() + 6); end.setHours(23,59,59,999);
+      return { start, end };
+    }
+    if (period === 'monthly') {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      return { start, end };
+    }
+    return { start: new Date(now), end: now };
   }
 
   function inPeriod(dateStr, range) {
@@ -2626,9 +2638,17 @@
 
   async function renderReport() {
     const range = getPeriodRange(_reportPeriod);
-    const labels = { daily: '오늘 기준 24시간', weekly: '최근 7일', monthly: '최근 30일' };
     const labelEl = document.getElementById('report-period-label');
-    if (labelEl) labelEl.textContent = labels[_reportPeriod];
+    if (labelEl) {
+      const fmt2 = d => `${d.getMonth()+1}월 ${d.getDate()}일`;
+      const range = getPeriodRange(_reportPeriod);
+      const labels = {
+        daily:   '오늘 기준 24시간',
+        weekly:  `${fmt2(range.start)} ~ ${fmt2(range.end)} (이번 주)`,
+        monthly: `${new Date().getFullYear()}년 ${new Date().getMonth()+1}월`,
+      };
+      labelEl.textContent = labels[_reportPeriod];
+    }
 
     if (!_jbCache) await jbRead();
 
