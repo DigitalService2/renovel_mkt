@@ -1227,20 +1227,28 @@
     </div>
   </div>
 
-  <!-- 콘텐츠 그리드 -->
-  <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:24px 28px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+  <!-- 성장 추이 차트 -->
+  <div style="display:none;background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:24px 28px;margin-bottom:20px" id="yt-trend-chart-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
       <div>
-        <div style="font-size:15px;font-weight:700">업로드 콘텐츠</div>
-        <div style="font-size:12px;color:var(--gray-3);margin-top:2px">최근 업로드 순 · YouTube Data API 실시간 연동</div>
+        <div style="font-size:15px;font-weight:700">콘텐츠 성장 추이</div>
+        <div style="font-size:12px;color:var(--gray-3);margin-top:2px">업로드 날짜 기준 · 영상별 누적 성과</div>
       </div>
-      <button onclick="loadYouTubePage()" style="background:var(--gray-0);border:1px solid var(--gray-1);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;color:var(--gray-4);cursor:pointer;font-family:inherit">↻ 새로고침</button>
+      <div style="display:flex;gap:6px" id="yt-chart-legend">
+        <button id="yt-leg-views" onclick="ytChartToggle('views')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1.5px solid #EF4444;background:#FEF2F2;color:#EF4444;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
+          <span style="display:inline-block;width:10px;height:2.5px;background:#EF4444;border-radius:2px"></span>조회수
+        </button>
+        <button id="yt-leg-likes" onclick="ytChartToggle('likes')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1.5px solid #F59E0B;background:#FFFBEB;color:#F59E0B;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
+          <span style="display:inline-block;width:10px;height:2.5px;background:#F59E0B;border-radius:2px"></span>좋아요
+        </button>
+        <button id="yt-leg-comments" onclick="ytChartToggle('comments')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1.5px solid #3B82F6;background:#EFF6FF;color:#3B82F6;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
+          <span style="display:inline-block;width:10px;height:2.5px;background:#3B82F6;border-radius:2px"></span>댓글
+        </button>
+      </div>
     </div>
-    <div id="yt-video-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
-      <div style="text-align:center;padding:40px;color:var(--gray-3);grid-column:1/-1">
-        <div style="font-size:32px;margin-bottom:8px">⏳</div>
-        <div style="font-size:14px">데이터를 불러오는 중입니다...</div>
-      </div>
+    <div style="position:relative" id="yt-chart-container">
+      <div id="yt-chart-svg-wrap" style="width:100%;overflow:hidden"></div>
+      <div id="yt-chart-tooltip" style="position:absolute;display:none;background:rgba(15,23,42,0.88);color:#fff;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:600;pointer-events:none;white-space:nowrap;z-index:10;transform:translateX(-50%)"></div>
     </div>
   </div>
 
@@ -1273,6 +1281,23 @@
         <span style="color:var(--yt)">🔗</span> 공유 TOP 3
       </div>
       <div id="yt-top-shares"></div>
+    </div>
+  </div>
+
+  <!-- 업로드 콘텐츠 그리드 -->
+  <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-1);padding:24px 28px;margin-top:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div>
+        <div style="font-size:15px;font-weight:700">업로드 콘텐츠</div>
+        <div style="font-size:12px;color:var(--gray-3);margin-top:2px">최근 업로드 순 · YouTube Data API 실시간 연동</div>
+      </div>
+      <button onclick="loadYouTubePage()" style="background:var(--gray-0);border:1px solid var(--gray-1);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;color:var(--gray-4);cursor:pointer;font-family:inherit">↻ 새로고침</button>
+    </div>
+    <div id="yt-video-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+      <div style="text-align:center;padding:40px;color:var(--gray-3);grid-column:1/-1">
+        <div style="font-size:32px;margin-bottom:8px">⏳</div>
+        <div style="font-size:14px">데이터를 불러오는 중입니다...</div>
+      </div>
     </div>
   </div>
   </div>
@@ -1827,17 +1852,20 @@
         grid.appendChild(card);
       });
 
-      // TOP 3 렌더링
+      // TOP 3 + 차트 렌더링
       const videos = vData.items.map(v => ({
         id: v.id,
         title: v.snippet.title,
         thumb: v.snippet.thumbnails?.medium?.url || '',
         url: 'https://www.youtube.com/watch?v=' + v.id,
+        date: v.snippet.publishedAt ? v.snippet.publishedAt.substring(0, 10) : '',
         views:    parseInt(v.statistics.viewCount    || 0),
         likes:    parseInt(v.statistics.likeCount    || 0),
         comments: parseInt(v.statistics.commentCount || 0),
         shares: 0,
       }));
+
+      renderYtTrendChart(videos);
 
       const renderTop3 = (elId, sortKey, valueLabel, color) => {
         const el = document.getElementById(elId);
@@ -1867,6 +1895,136 @@
       </div>`;
       console.warn('YT page video list error:', e);
     }
+  }
+
+  // ── YouTube 성장 추이 차트 ──
+  let _ytChartVideos = null;
+  const _ytChartVis = { views: true, likes: true, comments: true };
+
+  function ytChartToggle(key) {
+    _ytChartVis[key] = !_ytChartVis[key];
+    const btn = document.getElementById('yt-leg-' + key);
+    if (btn) btn.style.opacity = _ytChartVis[key] ? '1' : '0.35';
+    _drawYtChart();
+  }
+
+  function renderYtTrendChart(videos) {
+    const sorted = [...videos].filter(v => v.date).sort((a, b) => a.date.localeCompare(b.date));
+    if (sorted.length < 2) return;
+    _ytChartVideos = sorted;
+    document.getElementById('yt-trend-chart-section').style.display = 'block';
+    _drawYtChart();
+  }
+
+  function _drawYtChart() {
+    const data = _ytChartVideos;
+    if (!data) return;
+    const wrap = document.getElementById('yt-chart-svg-wrap');
+    if (!wrap) return;
+
+    const W = wrap.clientWidth || 760;
+    const H = 260;
+    const PAD = { top: 16, right: 24, bottom: 44, left: 56 };
+    const cW = W - PAD.left - PAD.right;
+    const cH = H - PAD.top - PAD.bottom;
+    const n = data.length;
+
+    const metrics = [
+      { key: 'views',    color: '#EF4444', label: '조회수' },
+      { key: 'likes',    color: '#F59E0B', label: '좋아요' },
+      { key: 'comments', color: '#3B82F6', label: '댓글'   },
+    ];
+
+    const maxVal = {};
+    metrics.forEach(m => {
+      maxVal[m.key] = Math.max(...data.map(d => d[m.key] || 0), 1);
+    });
+
+    const xPos = i => PAD.left + (n === 1 ? cW / 2 : i * cW / (n - 1));
+    const yPos = (val, mx) => PAD.top + cH - (val / mx) * cH;
+
+    const smoothPath = pts => {
+      if (pts.length < 2) return '';
+      let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+      for (let i = 1; i < pts.length; i++) {
+        const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+        const cpx = ((x0 + x1) / 2).toFixed(1);
+        d += ` C ${cpx} ${y0.toFixed(1)}, ${cpx} ${y1.toFixed(1)}, ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+      }
+      return d;
+    };
+
+    // Y-axis nice ticks
+    const globalMax = Math.max(...metrics.filter(m => _ytChartVis[m.key]).map(m => maxVal[m.key]), 1);
+    const tickCount = 4;
+    const rawStep = globalMax / tickCount;
+    const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+    const niceStep = Math.ceil(rawStep / mag) * mag;
+    const yTicks = Array.from({ length: tickCount + 1 }, (_, i) => i * niceStep);
+
+    let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="width:100%;max-width:100%;display:block;overflow:visible">`;
+
+    // Grid lines + Y labels
+    yTicks.forEach(tick => {
+      const y = PAD.top + cH - (tick / (niceStep * tickCount)) * cH;
+      if (y < PAD.top - 2 || y > PAD.top + cH + 2) return;
+      svg += `<line x1="${PAD.left}" y1="${y.toFixed(1)}" x2="${PAD.left + cW}" y2="${y.toFixed(1)}" stroke="#F1F5F9" stroke-width="1"/>`;
+      const label = tick >= 10000 ? (tick / 10000).toFixed(tick % 10000 === 0 ? 0 : 1) + '만'
+                  : tick >= 1000  ? (tick / 1000).toFixed(tick % 1000 === 0 ? 0 : 1) + 'k'
+                  : tick.toString();
+      svg += `<text x="${PAD.left - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="10" fill="#94A3B8" font-family="inherit">${label}</text>`;
+    });
+
+    // X axis baseline
+    svg += `<line x1="${PAD.left}" y1="${PAD.top + cH}" x2="${PAD.left + cW}" y2="${PAD.top + cH}" stroke="#E2E8F0" stroke-width="1"/>`;
+
+    // Draw lines + areas + dots per metric
+    metrics.forEach(m => {
+      if (!_ytChartVis[m.key]) return;
+      const pts = data.map((d, i) => [xPos(i), yPos(d[m.key] || 0, maxVal[m.key])]);
+      const pathD = smoothPath(pts);
+      const areaClose = ` L ${pts[pts.length-1][0].toFixed(1)} ${(PAD.top + cH).toFixed(1)} L ${pts[0][0].toFixed(1)} ${(PAD.top + cH).toFixed(1)} Z`;
+      svg += `<path d="${pathD}${areaClose}" fill="${m.color}" fill-opacity="0.07"/>`;
+      svg += `<path d="${pathD}" fill="none" stroke="${m.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+      pts.forEach((p, i) => {
+        const d = data[i];
+        const tipVal = fmt(d[m.key] || 0);
+        const tipDate = d.date ? d.date.replace(/-/g, '.').substring(2) : '';
+        const tipTitle = (d.title || '').substring(0, 16) + (d.title?.length > 16 ? '…' : '');
+        svg += `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4.5" fill="${m.color}" stroke="#fff" stroke-width="2"
+          onmouseenter="ytChartShowTip(event,'${tipDate}','${m.label}','${tipVal}','${tipTitle.replace(/'/g,'&#39;')}')"
+          onmouseleave="ytChartHideTip()" style="cursor:pointer"/>`;
+      });
+    });
+
+    // X axis labels
+    const step = Math.max(1, Math.ceil(n / 8));
+    data.forEach((d, i) => {
+      if (i % step !== 0 && i !== n - 1) return;
+      const label = d.date ? d.date.substring(5).replace('-', '/') : '';
+      svg += `<text x="${xPos(i).toFixed(1)}" y="${PAD.top + cH + 16}" text-anchor="middle" font-size="10" fill="#94A3B8" font-family="inherit">${label}</text>`;
+    });
+
+    svg += '</svg>';
+    wrap.innerHTML = svg;
+  }
+
+  function ytChartShowTip(e, date, metric, val, title) {
+    const tip = document.getElementById('yt-chart-tooltip');
+    const wrap = document.getElementById('yt-chart-container');
+    if (!tip || !wrap) return;
+    const rect = wrap.getBoundingClientRect();
+    const left = e.clientX - rect.left;
+    const top  = e.clientY - rect.top - 52;
+    tip.innerHTML = `<div style="font-size:10px;font-weight:400;color:rgba(255,255,255,.6);margin-bottom:2px">${date} · ${title}</div><span style="color:#fff">${metric} ${val}</span>`;
+    tip.style.display = 'block';
+    tip.style.left = left + 'px';
+    tip.style.top  = top + 'px';
+  }
+
+  function ytChartHideTip() {
+    const tip = document.getElementById('yt-chart-tooltip');
+    if (tip) tip.style.display = 'none';
   }
 
   // ── 수동 입력 모달 ──
