@@ -2619,7 +2619,7 @@
     // 미래 월은 이동 불가
     const now = new Date();
     const isFuture = _reportMonthYear > now.getFullYear() ||
-      (_reportMonthYear === now.getFullYear() && _reportMonthIndex >= now.getMonth());
+      (_reportMonthYear === now.getFullYear() && _reportMonthIndex > now.getMonth());
     nextBtn.style.opacity = isFuture ? '0.3' : '1';
     nextBtn.style.pointerEvents = isFuture ? 'none' : 'auto';
   }
@@ -2630,7 +2630,7 @@
     if (m > 11) { m = 0; y++; }
     if (m < 0)  { m = 11; y--; }
     const now = new Date();
-    if (y > now.getFullYear() || (y === now.getFullYear() && m >= now.getMonth())) return;
+    if (y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth())) return;
     _reportMonthIndex = m;
     _reportMonthYear  = y;
     updateMonthNav();
