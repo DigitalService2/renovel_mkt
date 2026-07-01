@@ -1502,7 +1502,14 @@
         <button class="report-period-btn active" data-period="weekly" onclick="setReportPeriod('weekly',this)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--navy);background:var(--navy);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">주간</button>
         <button class="report-period-btn" data-period="monthly" onclick="setReportPeriod('monthly',this)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--gray-1);background:#fff;color:var(--gray-4);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">월간</button>
       </div>
-      <div id="report-period-label" style="font-size:12px;color:var(--gray-3)"></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="report-month-nav" style="display:none;align-items:center;gap:6px">
+          <button onclick="shiftReportMonth(-1)" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--gray-1);background:#fff;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;color:var(--gray-4)">‹</button>
+          <span id="report-month-label" style="font-size:13px;font-weight:700;color:var(--navy);min-width:72px;text-align:center"></span>
+          <button onclick="shiftReportMonth(1)" id="report-month-next" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--gray-1);background:#fff;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;color:var(--gray-4)">›</button>
+        </div>
+        <div id="report-period-label" style="font-size:12px;color:var(--gray-3)"></div>
+      </div>
     </div>
 
     <!-- 채널별 요약 KPI -->
@@ -1711,7 +1718,7 @@
     if (id === 'page-youtube')   loadYouTubePage();
     if (id === 'page-tiktok')    renderContentGrid('tt');
     if (id === 'page-instagram') renderContentGrid('ig');
-    if (id === 'page-report')    renderReport();
+    if (id === 'page-report')    { updateMonthNav(); renderReport(); }
     if (id === 'page-calendar')  renderCalendar();
   }
 
@@ -2595,6 +2602,41 @@
   let _reportPeriod = 'weekly';
   let _ytReportCache = [];
 
+  // 월간 탭 선택 월 (기본: 이전 달)
+  const _now = new Date();
+  let _reportMonthYear  = _now.getMonth() === 0 ? _now.getFullYear() - 1 : _now.getFullYear();
+  let _reportMonthIndex = _now.getMonth() === 0 ? 11 : _now.getMonth() - 1; // 0-based
+
+  function updateMonthNav() {
+    const nav   = document.getElementById('report-month-nav');
+    const label = document.getElementById('report-month-label');
+    const nextBtn = document.getElementById('report-month-next');
+    if (!nav) return;
+    const isMonthly = _reportPeriod === 'monthly';
+    nav.style.display = isMonthly ? 'flex' : 'none';
+    if (!isMonthly) return;
+    label.textContent = `${_reportMonthYear}년 ${_reportMonthIndex + 1}월`;
+    // 미래 월은 이동 불가
+    const now = new Date();
+    const isFuture = _reportMonthYear > now.getFullYear() ||
+      (_reportMonthYear === now.getFullYear() && _reportMonthIndex >= now.getMonth());
+    nextBtn.style.opacity = isFuture ? '0.3' : '1';
+    nextBtn.style.pointerEvents = isFuture ? 'none' : 'auto';
+  }
+
+  function shiftReportMonth(delta) {
+    let m = _reportMonthIndex + delta;
+    let y = _reportMonthYear;
+    if (m > 11) { m = 0; y++; }
+    if (m < 0)  { m = 11; y--; }
+    const now = new Date();
+    if (y > now.getFullYear() || (y === now.getFullYear() && m >= now.getMonth())) return;
+    _reportMonthIndex = m;
+    _reportMonthYear  = y;
+    updateMonthNav();
+    renderReport();
+  }
+
   function setReportPeriod(period, btn) {
     _reportPeriod = period;
     document.querySelectorAll('.report-period-btn').forEach(b => {
@@ -2603,6 +2645,7 @@
       b.style.color       = active ? '#fff' : 'var(--gray-4)';
       b.style.borderColor = active ? 'var(--navy)' : 'var(--gray-1)';
     });
+    updateMonthNav();
     renderReport();
   }
 
@@ -2620,8 +2663,8 @@
       return { start, end };
     }
     if (period === 'monthly') {
-      const start = new Date(now.getFullYear(), now.getMonth(), 1);
-      const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      const start = new Date(_reportMonthYear, _reportMonthIndex, 1);
+      const end   = new Date(_reportMonthYear, _reportMonthIndex + 1, 0, 23, 59, 59, 999);
       return { start, end };
     }
     return { start: new Date(now), end: now };
@@ -2653,7 +2696,7 @@
       const labels = {
         daily:   '오늘 기준 24시간',
         weekly:  `${fmt2(range.start)} ~ ${fmt2(range.end)} (이번 주)`,
-        monthly: `${new Date().getFullYear()}년 ${new Date().getMonth()+1}월`,
+        monthly: `${_reportMonthYear}년 ${_reportMonthIndex + 1}월`,
       };
       labelEl.textContent = labels[_reportPeriod];
     }
@@ -2727,7 +2770,7 @@
     const crossSubtitle = document.getElementById('report-cross-subtitle');
     if (crossSubtitle) {
       crossSubtitle.textContent = _reportPeriod === 'monthly'
-        ? '당월 업로드 건 · 제목 첫 두 단어 기준으로 동일 콘텐츠 자동 매칭'
+        ? '전월 업로드 건 · 제목 첫 두 단어 기준으로 동일 콘텐츠 자동 매칭'
         : '업로드 2주 이내 · 제목 첫 두 단어 기준으로 동일 콘텐츠 자동 매칭';
     }
 
